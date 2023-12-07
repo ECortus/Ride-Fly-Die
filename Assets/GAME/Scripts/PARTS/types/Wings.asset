@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 85c9a74a9a24719469cb44178229667c, type: 3}
+  m_Name: Wings
+  m_EditorClassIdentifier: 
+  <Category>k__BackingField: 2
+  <PartLevels>k__BackingField:
+  - {fileID: 975173238331299067, guid: 119a34611bb4c2044bc32fc2c54623e8, type: 3}
+  - {fileID: 4617822703451598027, guid: 18fd9266dc87ca9478410f770943568f, type: 3}
+  - {fileID: 1237340488436024338, guid: 64c21413b372f034bae8635479fd2d04, type: 3}
+  - {fileID: -1434495149498257422, guid: 86cd1b767667c9d43bb91190c218e38a, type: 3}
+  - {fileID: 8668209062779115325, guid: a0a79e3b9acafd043b3fda7f8ff35428, type: 3}

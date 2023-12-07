@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 85c9a74a9a24719469cb44178229667c, type: 3}
+  m_Name: Boost
+  m_EditorClassIdentifier: 
+  <Category>k__BackingField: 3
+  <PartLevels>k__BackingField:
+  - {fileID: 7929257974113676610, guid: 4fcfb5413350bb74c82503eb8d78db26, type: 3}
+  - {fileID: 2673254062157050856, guid: e686d3bff01656a4891de9df0dd02700, type: 3}
+  - {fileID: 5402228718476844421, guid: 81d32984db353604e9c954a6d176a333, type: 3}
+  - {fileID: 1655826015634256706, guid: 558b97a080924d84c9c7da15d13e6e4e, type: 3}
+  - {fileID: -348545555386574920, guid: 9689a83669556d6449ca96ed33e6cf3d, type: 3}

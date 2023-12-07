@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f99104beef3755344af4e4e514b30508, type: 3}
+  m_Name: BuyPartPars-1
+  m_EditorClassIdentifier: 
+  <Types>k__BackingField:
+  - {fileID: 11400000, guid: 6ca89a85831c36e46a650f7288c10fc3, type: 2}
+  - {fileID: 11400000, guid: 0b9b90665ee80d14e8dae14ed6fcc8fb, type: 2}
+  - {fileID: 11400000, guid: 1566bab67fa6b1540834f6561c1574c2, type: 2}
+  DefaultPrice: 2
+  Multiple: 1.2
