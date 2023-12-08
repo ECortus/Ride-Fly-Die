@@ -47,7 +47,7 @@ public class PlayerChelDoll : MonoBehaviour
 
     void FixedUpdate()
     {
-        if (!GameManager.GameStarted && !Part.DragerPart)
+        if (!GameManager.GameStarted && !Part.DragedPart)
         {
             animator.SetBool(_SomethingTopHash, SomethingOverPlayer);
         }

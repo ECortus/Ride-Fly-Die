@@ -8,9 +8,12 @@ using UnityEngine;
 
 public abstract class Part : MonoBehaviour
 {
+    private PlayerSettings _settings;
+    
     [field: SerializeField] public PartType Type { get; private set; }
     [field: SerializeField] public int Level { get; private set; }
     [field: SerializeField] public float Mass { get; private set; }
+    [field: SerializeField] public Sprite Sprite { get; private set; }
     
     [field: SerializeField] public bool BlockMerge { get; private set; }
     [field: SerializeField] public bool BlockMove { get; private set; }
@@ -72,9 +75,9 @@ public abstract class Part : MonoBehaviour
     private static Part _dragedPart;
     private static Part _canMovePart;
 
-    public static Part DragerPart => _dragedPart;
+    public static Part DragedPart => _dragedPart;
     
-    public static void SetDragedPart(Part part)
+    private static void SetDragedPart(Part part)
     {
         _dragedPart = part;
     }
@@ -132,12 +135,17 @@ public abstract class Part : MonoBehaviour
         Body.isKinematic = false;
         Part neighbor;
 
+        Body.interpolation = RigidbodyInterpolation.Extrapolate;
+        Body.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
+
         if (HaveRequireNeighbors(out neighbor) || Type.Category == PartCategory.Cabin || Type.Category == PartCategory.Grid)
         {
             Body.useGravity = false;
             
             if (Type.Category != PartCategory.Cabin) Joint.connectedBody = neighbor.Body;
             else Joint.connectedBody = PlayerController.Instance.Body;
+
+            Joint.axis = new Vector3(0, 0, 1);
             
             AddMod();
         }
@@ -170,6 +178,8 @@ public abstract class Part : MonoBehaviour
 
     void Init()
     {
+        _settings = Resources.Load<PlayerSettings>("SETTINGS/PlayerSettings");
+        
         Object = getChildGameObject("obj");
 
         if (!BlockMerge)
@@ -472,7 +482,7 @@ public abstract class Part : MonoBehaviour
                 SetMousePosition();
             }
 
-            if (!MergeCell.SelectedCell && !GridCell.SelectedCell)
+            if (!MergeCell.SelectedCell && !GridCell.SelectedCell && !DeletePart.Selected)
             {
                 ChangeColor(false);
                 transform.localScale = Vector3.MoveTowards(transform.localScale, Vector3.one * 1.3f, 6f * Time.deltaTime);
@@ -502,6 +512,15 @@ public abstract class Part : MonoBehaviour
         
         if (_dragedPart != null && _dragedPart == this)
         {
+            if (DeletePart.Selected)
+            {
+                UnRegistry();
+                
+                DestroyPart();
+                SetDragedPart(null);
+                return;
+            }
+            
             GridCell selectedGrid = GridCell.SelectedCell;
             
             if (selectedGrid)
@@ -510,13 +529,7 @@ public abstract class Part : MonoBehaviour
                         && !selectedGrid.AdditionalPart
                         && Orientations.HaveOrientation(PartOrientation.Front))
                 {
-                    if (_currentGridCell)
-                    {
-                        if(_currentGridCell.AdditionalPart && _currentGridCell.AdditionalPart == this) _currentGridCell.UnRegistryAdditional();
-                        if(_currentGridCell.Part && _currentGridCell.Part == this) _currentGridCell.UnRegistry();
-                    }
-                    
-                    if(_currentMergeCell && _currentMergeCell.Part == this) _currentMergeCell.UnRegistry();
+                    UnRegistry();
                     
                     selectedGrid.RegistryAdditional(this);
                     SetOrientation(PartOrientation.Front);
@@ -594,6 +607,17 @@ public abstract class Part : MonoBehaviour
         SetDragedPart(null);
     }
 
+    void UnRegistry()
+    {
+        if (_currentGridCell)
+        {
+            if(_currentGridCell.AdditionalPart && _currentGridCell.AdditionalPart == this) _currentGridCell.UnRegistryAdditional();
+            if(_currentGridCell.Part && _currentGridCell.Part == this) _currentGridCell.UnRegistry();
+        }
+                    
+        if(_currentMergeCell && _currentMergeCell.Part == this) _currentMergeCell.UnRegistry();
+    }
+
     public void SetDefaultParsOnGrid(Vector3 pos, Transform parent)
     {
         SwitchObjects(true);
@@ -631,10 +655,16 @@ public abstract class Part : MonoBehaviour
         {
             inGameObject.gameObject.SetActive(state);
         }
-        
-        if (onGridObject)
+
+        if (_settings.Mod == GridMode.Model)
         {
-            onGridObject.gameObject.SetActive(!state);
+            if (onGridObject) onGridObject.gameObject.SetActive(!state);
+            if (_currentMergeCell) _currentMergeCell.SetUI(false);
+        }
+        else if (_settings.Mod == GridMode.Sprite)
+        {
+            if (onGridObject) onGridObject.gameObject.SetActive(false);
+            if (_currentMergeCell) _currentMergeCell.SetUI(!state);
         }
     }
 

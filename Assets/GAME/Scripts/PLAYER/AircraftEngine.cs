@@ -6,8 +6,8 @@ using System;
 using System.Linq;
 using TMPro.Examples;
 
-[RequireComponent(typeof(Rigidbody))]
-[RequireComponent(typeof(SphereCollider))]
+// [RequireComponent(typeof(Rigidbody))]
+// [RequireComponent(typeof(SphereCollider))]
 
 [ExecuteInEditMode]
 public class AircraftEngine : MonoBehaviour
@@ -222,11 +222,11 @@ public class AircraftEngine : MonoBehaviour
         Body.mass = bodyMass * (adjustToScale ? cubicScale : 1);
         Body.drag = 0;
         Body.angularDrag = 1f;
-        Body.constraints = RigidbodyConstraints.None;
-        Body.useGravity = false;
+        // Body.constraints = RigidbodyConstraints.FreezeRotation;
+        // Body.useGravity = false;
         // Body.isKinematic = false;
-        Body.interpolation = RigidbodyInterpolation.Extrapolate;
-        Body.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
+        // Body.interpolation = RigidbodyInterpolation.Extrapolate;
+        // Body.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
     
         Sphere.radius = colliderRadius;
         Sphere.isTrigger = false;
@@ -307,19 +307,11 @@ public class AircraftEngine : MonoBehaviour
         groundRotation = Quaternion.LookRotation(crossForward, crossUp);
         
         float groundXAngle = groundRotation.eulerAngles.x;
-        float groundYAngle = groundRotation.eulerAngles.y;
+        float groundYAngle = Body.rotation.eulerAngles.y;
         float groundZAngle = groundRotation.eulerAngles.z;
 
         Quaternion rotation;
-
-        if (PlayerController.Launched)
-        {
-            rotation = Quaternion.Euler(groundXAngle, Body.rotation.eulerAngles.y, groundZAngle);
-        }
-        else
-        {
-            rotation = Quaternion.Euler(groundXAngle, Body.rotation.eulerAngles.y, groundZAngle);
-        }
+        rotation = Quaternion.Euler(groundXAngle, groundYAngle, groundZAngle);
         
         // Body.MoveRotation(rotation);
     
@@ -334,6 +326,8 @@ public class AircraftEngine : MonoBehaviour
                 gravityDirection = onGround ? -crossUp : Vector3.down;
                 break;
         }
+
+        velocity += -transform.forward * 12f * deltaTime;
 
         velocity += gravityDirection * Mathf.Min(Mathf.Max(0, maxGravity + velocity.y), gravityVelocity * deltaTime);
         

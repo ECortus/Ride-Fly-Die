@@ -103,8 +103,6 @@ public class PlayerController : MonoBehaviour
                 
                 SetPartVisuals(false);
             }
-            
-            
         }
         else
         {
@@ -184,6 +182,8 @@ public class PlayerController : MonoBehaviour
         engine.enabled = true;
         OffControl();
 
+        partsArray = GetComponentsInChildren<Part>();
+        
         // Body.velocity = Vector3.zero;
         // Body.angularVelocity = Vector3.zero;
         

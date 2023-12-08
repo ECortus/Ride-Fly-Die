@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using UnityEngine.UI;
+using TMPro;
 
 public class MergeCell : MonoBehaviour
 {
@@ -12,6 +14,14 @@ public class MergeCell : MonoBehaviour
 
     private int _id;
     private bool _showed;
+
+    [SerializeField] private Image spriteShow;
+    [SerializeField] private TextMeshProUGUI levelText;
+
+    // private void Awake()
+    // {
+    //     if (!Part) SetUI(false);
+    // }
 
     private void OnMouseOver()
     {
@@ -26,6 +36,9 @@ public class MergeCell : MonoBehaviour
     public void Registry(Part part)
     {
         Part = part;
+        
+        SetUI(true);
+        
         OnUpdateState?.Invoke();
         Save();
     }
@@ -33,6 +46,9 @@ public class MergeCell : MonoBehaviour
     public void UnRegistry()
     {
         Part = null;
+        
+        SetUI(false);
+        
         OnUpdateState?.Invoke();
         Save();
     }
@@ -40,6 +56,26 @@ public class MergeCell : MonoBehaviour
     private void Save()
     {
         SaveManager.Save($"MergeCell{_id}", Part);
+    }
+
+    public void SetUI(bool state)
+    {
+        // if(!_spriteShow) _spriteShow = GetComponentInChildren<Image>();
+        // if(!_levelText) _levelText = GetComponentInChildren<TextMeshProUGUI>();
+
+        if (Part && state)
+        {
+            spriteShow.gameObject.SetActive(true);
+            levelText.transform.parent.gameObject.SetActive(true);
+
+            spriteShow.sprite = Part.Sprite;
+            levelText.text = Part.Level.ToString();
+        }
+        else
+        {
+            spriteShow.gameObject.SetActive(false);
+            levelText.transform.parent.gameObject.SetActive(false);
+        }
     }
         
     public void Load(int id)
@@ -55,7 +91,11 @@ public class MergeCell : MonoBehaviour
         _id = id;
         Part = SaveManager.Load($"MergeCell{_id}");
 
-        if (Part == null) return;
+        if (Part == null)
+        {
+            SetUI(false);
+            return;
+        }
             
         MergeGrid.Instance.SpawnPartToCell(Part, this);
         OnUpdateState?.Invoke();

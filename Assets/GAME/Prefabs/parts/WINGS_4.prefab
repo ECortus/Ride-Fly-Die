@@ -628,6 +628,8 @@ MonoBehaviour:
     type: 2}
   <Level>k__BackingField: 3
   <Mass>k__BackingField: 0.5
+  <Sprite>k__BackingField: {fileID: 21300000, guid: 504e726956b7d374bba55bb0f74a53e0,
+    type: 3}
   <BlockMerge>k__BackingField: 0
   <BlockMove>k__BackingField: 0
   <Orientations>k__BackingField:
@@ -672,7 +674,7 @@ Rigidbody:
   serializedVersion: 4
   m_Mass: 1
   m_Drag: 0
-  m_AngularDrag: 0.05
+  m_AngularDrag: 1
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
   m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
@@ -688,7 +690,7 @@ Rigidbody:
   m_IsKinematic: 1
   m_Interpolate: 0
   m_Constraints: 0
-  m_CollisionDetection: 2
+  m_CollisionDetection: 0
 --- !u!59 &-733348591498427885
 HingeJoint:
   m_ObjectHideFlags: 0
@@ -705,7 +707,7 @@ HingeJoint:
   serializedVersion: 2
   m_UseSpring: 1
   m_Spring:
-    spring: 70000
+    spring: 7000
     damper: 300
     targetPosition: 0
   m_UseMotor: 0

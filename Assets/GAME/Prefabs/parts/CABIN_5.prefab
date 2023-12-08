@@ -1101,6 +1101,7 @@ GameObject:
   - component: {fileID: 953652520759469297}
   - component: {fileID: -4129596217977933222}
   - component: {fileID: -5548133754524941111}
+  - component: {fileID: 7922895750817585168}
   m_Layer: 12
   m_Name: CABIN_5
   m_TagString: Untagged
@@ -1143,6 +1144,7 @@ MonoBehaviour:
     type: 2}
   <Level>k__BackingField: 4
   <Mass>k__BackingField: 5
+  <Sprite>k__BackingField: {fileID: 0}
   <BlockMerge>k__BackingField: 1
   <BlockMove>k__BackingField: 1
   <Orientations>k__BackingField:
@@ -1170,7 +1172,7 @@ Rigidbody:
   serializedVersion: 4
   m_Mass: 1
   m_Drag: 0
-  m_AngularDrag: 0.05
+  m_AngularDrag: 1
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
   m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
@@ -1186,7 +1188,7 @@ Rigidbody:
   m_IsKinematic: 1
   m_Interpolate: 0
   m_Constraints: 0
-  m_CollisionDetection: 2
+  m_CollisionDetection: 0
 --- !u!59 &-5548133754524941111
 HingeJoint:
   m_ObjectHideFlags: 0
@@ -1203,7 +1205,7 @@ HingeJoint:
   serializedVersion: 2
   m_UseSpring: 1
   m_Spring:
-    spring: 70000
+    spring: 7000
     damper: 300
     targetPosition: 0
   m_UseMotor: 0
@@ -1226,6 +1228,27 @@ HingeJoint:
   m_EnablePreprocessing: 1
   m_MassScale: 1
   m_ConnectedMassScale: 1
+--- !u!135 &7922895750817585168
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6136503311033062102}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Radius: 0.5
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &6261508582804906539
 GameObject:
   m_ObjectHideFlags: 0
