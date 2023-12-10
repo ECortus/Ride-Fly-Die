@@ -32,131 +32,43 @@ public class AircraftEngine : MonoBehaviour
     private bool _TakeControl { get; set; }
     public void SetControl(bool take) => _TakeControl = take;
     
-    private List<ParametersModifier> 
-        BoostModifiersList = new List<ParametersModifier>(), 
-        AccelerationModifiersList = new List<ParametersModifier>(), 
-        FlyModifiersList = new List<ParametersModifier>();
-
-    private Vector3 BoostDirectionModifier;
-    private float FlyModifier = 1f;
-    private float AccelerationModifier = 1f;
-
-    public void AddModifier(ParametersModifier mod)
-    {
-        if (mod == null) return;
-        
-        switch (mod.Type)
-        {
-            case ModifierType.Boost:
-                if(!BoostModifiersList.Contains(mod)) BoostModifiersList.Add(mod);
-                break;
-            case ModifierType.Wheels:
-                if(!AccelerationModifiersList.Contains(mod)) AccelerationModifiersList.Add(mod);
-                break;
-            case ModifierType.Wings:
-                if(!FlyModifiersList.Contains(mod)) FlyModifiersList.Add(mod);
-                break;
-            default:
-                break;
-        }
-    }
-
-    public void RemoveModifier(ParametersModifier mod)
-    {
-        if (mod == null) return;
-        
-        switch (mod.Type)
-        {
-            case ModifierType.Boost:
-                if(BoostModifiersList.Contains(mod)) BoostModifiersList.Remove(mod);
-                break;
-            case ModifierType.Wheels:
-                if(AccelerationModifiersList.Contains(mod)) AccelerationModifiersList.Remove(mod);
-                break;
-            case ModifierType.Wings:
-                if(FlyModifiersList.Contains(mod)) FlyModifiersList.Remove(mod);
-                break;
-            default:
-                break;
-        }
-    }
-
-    public void ClearModifiers()
-    {
-        BoostModifiersList.Clear();
-        AccelerationModifiersList.Clear();
-        FlyModifiersList.Clear();
-    }
-
-    private void RefreshMods()
-    {
-        Vector3 dir = Vector3.zero;
-        for(int i = 0; i < BoostModifiersList.Count; i++)
-        {
-            if (BoostModifiersList[i] != null)
-            {
-                dir += BoostModifiersList[i].Direction * BoostModifiersList[i].Force;
-            }
-        }
-        BoostDirectionModifier = dir;
-        
-        float value = 1f;
-        for(int i = 0; i < FlyModifiersList.Count; i++)
-        {
-            if (FlyModifiersList[i] != null)
-            {
-                value += FlyModifiersList[i].Force * Mathf.Cos(Vector3.Angle(FlyModifiersList[i].Direction, PlayerController.Instance.Forward));
-            }
-        }
-        FlyModifier = value;
-        
-        value = 1f;
-        foreach (var VARIABLE in AccelerationModifiersList)
-        {
-            if (VARIABLE != null)
-            {
-                value += VARIABLE.Force * Mathf.Cos(Vector3.Angle(VARIABLE.Direction, PlayerController.Instance.Forward));
-            }
-        }
-        AccelerationModifier = value;
-    }
-
-    private List<ParametersModifier> GetParametersByType(List<ParametersModifier> parts, ModifierType type)
-    {
-        List<ParametersModifier> modifiers = new List<ParametersModifier>();
-        
-        foreach (ParametersModifier VARIABLE in parts)
-        {
-            if (VARIABLE.Type == type)
-            {
-                modifiers.Add(VARIABLE);
-            }
-        }
-
-        return modifiers;
-    }
-    
     [Header("Physics")]
     public float colliderRadius = 2f;
     public float bodyMass = 1f;
     public GRAVITY_MODE gravityMode = GRAVITY_MODE.TowardsGround;
     public float gravityVelocity = 80;
     public float maxGravity = 50;
+    public float gravityMultiplierOnMotor = 0.8f;
+
+    [Space] 
     public float maxSlopeAngle = 50f;
+    public float rotateVelocity = 45f;
     public float rotateForce = 35f;
+    public Vector3 globalRotateDelta;
     public float planeRotateMultiplier = 1.2f;
+    public float planeRotateBackMultiplier = 0.75f;
+    
+    [Space]
     public LayerMask collidableLayers = ~0;
     public bool adjustToScale = false;
     
     [Header("Engine")]
+    public AnimationCurve accelerationCurve = new AnimationCurve(new Keyframe[] { new Keyframe(0, 1), new Keyframe(1, 0) });
     public float maxAccelerationForward = 100;
     public float maxSpeedForward = 40;
     public float maxAccelerationReverse = 50;
+    
+    [Space]
     public float maxSpeedReverse = 20;
     public float brakeStrength = 200;
+    
+    [Space]
     public float slopeFriction = 1f;
+    public float forwardFriction = 40;
+    public float lateralFriction = 80;
 
-    private bool onGround = false;
+    [Header("DEBUG: ")]
+    public bool onGround = false;
     private Vector3 crossForward = Vector3.zero;
     private Vector3 crossUp = Vector3.zero;
     private Vector3 crossRight = Vector3.zero;
@@ -175,7 +87,9 @@ public class AircraftEngine : MonoBehaviour
     private Vector3 gravityDirection = Vector3.zero;
     private float inputSteering = 0;
     private float inputMotor = 0;
+    public float inputPlaneRotate;
     private PhysicMaterial customPhysicMaterial;
+    private Quaternion bodyVelocityLook;
     private Quaternion groundRotation;
     private float slopeDelta = 0;
     private float boostMultiplier = 1;
@@ -184,8 +98,119 @@ public class AircraftEngine : MonoBehaviour
     private float scaleAdjustment = 1;
     private float cubicScale = 1;
     private float inverseScaleAdjustment = 1;
+
+    private List<Part> ConnectedParts;
+
+    public void ClearParts()
+    {
+        if (ConnectedParts != null) ConnectedParts.Clear();
+        defaultRotation = null;
+
+        boostDirection = accelerationDirection = planeDirection = Vector3.zero;
+        boostModificator = accelerationModificator = planeModificator = 0f;
+    }
     
-    public float inputPlaneRotate { get; set; }
+    public void AddPart(Part part)
+    {
+        if (ConnectedParts == null) ConnectedParts = new List<Part>();
+        
+        if (!ConnectedParts.Contains(part))
+        {
+            ConnectedParts.Add(part);
+            AddParameter(part.GetFlyParameters());
+        }
+    }
+    
+    public void RemovePart(Part part)
+    {
+        if (ConnectedParts == null) ConnectedParts = new List<Part>();
+        
+        if (ConnectedParts.Contains(part))
+        {
+            ConnectedParts.Remove(part);
+            RemoveParameter(part.GetFlyParameters());
+        }
+    }
+    
+    [SerializeField] private Vector3 boostDirection, accelerationDirection, planeDirection;
+    [SerializeField] private float boostModificator, accelerationModificator, planeModificator;
+
+    void AddParameter(ParametersModifier mod)
+    {
+        if (mod == null) return;
+
+        if (accelerationModificator == 0) accelerationModificator = 1f;
+        
+        if (mod.Type == ModifierType.Boost)
+        {
+            boostDirection += mod.Direction;
+            boostDirection = boostDirection.normalized;
+            
+            boostModificator += mod.Force;
+        }
+        else if (mod.Type == ModifierType.Wheels)
+        {
+            accelerationDirection += mod.Direction;
+            accelerationDirection = accelerationDirection.normalized;
+            
+            accelerationModificator += mod.Force * -Vector3.Dot(transform.forward, mod.Direction);
+        }
+        else if (mod.Type == ModifierType.Wings)
+        {
+            if (!wingsMods.Contains(mod))
+            {
+                wingsMods.Add(mod);
+                FormWings();
+            }
+        }
+    }
+
+    void RemoveParameter(ParametersModifier mod)
+    {
+        if (mod == null) return;
+        
+        if (accelerationModificator == 0) accelerationModificator = 1f;
+        
+        if (mod.Type == ModifierType.Boost)
+        {
+            boostDirection -= mod.Direction;
+            boostDirection = boostDirection.normalized;
+            
+            boostModificator -= mod.Force;
+        }
+        else if (mod.Type == ModifierType.Wheels)
+        {
+            accelerationDirection -= mod.Direction;
+            accelerationDirection = accelerationDirection.normalized;
+            
+            accelerationModificator -= mod.Force;
+        }
+        else if (mod.Type == ModifierType.Wings)
+        {
+            if (wingsMods.Contains(mod))
+            {
+                wingsMods.Remove(mod);
+                FormWings();
+            }
+        }
+    }
+
+    private List<ParametersModifier> wingsMods = new List<ParametersModifier>();
+
+    void FormWings()
+    {
+        Vector3 direction = Vector3.zero;
+        float force = 0f;
+
+        for (int i = 0; i < wingsMods.Count; i++)
+        {
+            direction += wingsMods[i].Direction;
+            force += wingsMods[i].Force;
+        }
+        
+        planeDirection = direction.normalized;
+        planeModificator = force / wingsMods.Count;
+    }
     
     void Start()
     {
@@ -207,7 +232,10 @@ public class AircraftEngine : MonoBehaviour
 
     public void AccelerateBody(Vector3 direction, float percentForce = 1)
     {
-        Body.AddForce(-direction * LaunchPower.Power * percentForce * AccelerationModifier, ForceMode.Acceleration);
+        // Body.AddForce(direction * LaunchPower.Power * accelerationModificator * percentForce, ForceMode.Acceleration);
+        // Debug.Log(direction * LaunchPower.Power * accelerationModificator * percentForce);
+        Body.rotation = Quaternion.LookRotation(-direction);
+        Body.velocity += direction * LaunchPower.Power * accelerationModificator * percentForce;
     }
     
     void Update()
@@ -235,6 +263,8 @@ public class AircraftEngine : MonoBehaviour
     
     void FixedUpdate()
     {
+        SetVisuals(!_TakeControl && getMotor() > 0);
+        
         if (_TakeControl) return;
         
         averageScale = (transform.lossyScale.x + transform.lossyScale.y + transform.lossyScale.z) / 3f;
@@ -303,20 +333,56 @@ public class AircraftEngine : MonoBehaviour
         Vector3 velocity = Body.velocity;
         groundVelocity = (velocity - Vector3.up * velocity.y).magnitude;
         crossForward = Vector3.Cross(-crossUp, transform.right);
+        crossRight = Vector3.Cross(-crossUp, transform.forward);
+
+        forwardVelocity = Vector3.Dot(velocity, crossForward);
+        rightVelocity = Vector3.Dot(velocity, crossRight);
     
         groundRotation = Quaternion.LookRotation(crossForward, crossUp);
-        
-        float groundXAngle = groundRotation.eulerAngles.x;
-        float groundYAngle = Body.rotation.eulerAngles.y;
-        float groundZAngle = groundRotation.eulerAngles.z;
+        bodyVelocityLook = Quaternion.LookRotation(Body.velocity.normalized);
+        // Debug.DrawRay(transform.position, Body.velocity.normalized * 999f, Color.magenta);
 
-        Quaternion rotation;
-        rotation = Quaternion.Euler(groundXAngle, groundYAngle, groundZAngle);
-        
-        // Body.MoveRotation(rotation);
+        float groundXAngle, groundYAngle, groundZAngle, targetX;
+
+        if (PlayerController.Launched)
+        {
+            groundXAngle = groundRotation.eulerAngles.x > 180f
+                ? -(360f - groundRotation.eulerAngles.x)
+                : groundRotation.eulerAngles.x;
+            targetX = bodyVelocityLook.eulerAngles.x > 180f
+                ? -(360f - bodyVelocityLook.eulerAngles.x)
+                : bodyVelocityLook.eulerAngles.x;
+            groundXAngle = Mathf.MoveTowards(groundXAngle,
+                onGround ? groundRotation.eulerAngles.x : -targetX,
+                globalRotateDelta.x * deltaTime);
+            // groundXAngle = groundRotation.eulerAngles.x;
+            
+            groundYAngle = Mathf.MoveTowards(Body.rotation.eulerAngles.y,
+                180f,
+                globalRotateDelta.y * deltaTime);
+            
+            groundZAngle = groundRotation.eulerAngles.z > 180f
+                ? -(360f - groundRotation.eulerAngles.z)
+                : groundRotation.eulerAngles.z;
+            groundZAngle = Mathf.MoveTowards(groundZAngle, 
+                inputPlaneRotate * maxSlopeAngle, 
+                globalRotateDelta.z * deltaTime);
+        }
+        else
+        {
+            groundXAngle = 0;
+            groundYAngle = Body.rotation.eulerAngles.y;
+            groundZAngle = 0;
+        }
+
+        // Debug.Log(new Vector3(groundXAngle, groundYAngle, groundZAngle) + ", " + onGround);
+        Quaternion rotation = Quaternion.Euler(groundXAngle, groundYAngle, groundZAngle);
+        SetRotation(rotation);
     
         // gravity
         gravityDirection = Vector3.zero;
+        float gravityMultiplier = getMotor() > 0 ? gravityMultiplierOnMotor : 1f;
+        
         switch (gravityMode)
         {
             case GRAVITY_MODE.AlwaysDown:
@@ -326,12 +392,101 @@ public class AircraftEngine : MonoBehaviour
                 gravityDirection = onGround ? -crossUp : Vector3.down;
                 break;
         }
-
-        velocity += -transform.forward * 12f * deltaTime;
-
-        velocity += gravityDirection * Mathf.Min(Mathf.Max(0, maxGravity + velocity.y), gravityVelocity * deltaTime);
         
+        Vector3 accelerationMod = accelerationDirection * accelerationModificator;
+        
+        if (onGround)
+        {
+            if (motor == 0 || Mathf.Sign(motor) != Mathf.Sign(forwardVelocity)) velocity -= -crossForward * Mathf.Sign(forwardVelocity) * Mathf.Min(Mathf.Abs(forwardVelocity), forwardFriction * scaleAdjustment * deltaTime);
+            velocity -= crossRight * Mathf.Sign(rightVelocity) * Mathf.Min(Mathf.Abs(rightVelocity), lateralFriction * scaleAdjustment * deltaTime);
+
+            float slopeMultiplier = Mathf.Max(0, (Mathf.Sign(motor) * slopeDelta * slopeFriction * scaleAdjustment + 1f));
+            float accelerationForce = 
+                getAcceleration(0.5f * boostMultiplier * slopeMultiplier, 0.25f * boostMultiplier * slopeMultiplier) * boostModificator;
+            
+            velocity += boostDirection * getMotor() * accelerationForce * accelerationMod.z * deltaTime;
+        }
+
+        float rotateMultiplier = Mathf.Abs(inputPlaneRotate) > 0.05f ? planeRotateMultiplier : planeRotateBackMultiplier;
+        float rotateDelta = rotateForce * rotateMultiplier * deltaTime;
+        
+        velocity.x = Mathf.Lerp(velocity.x, inputPlaneRotate * rotateVelocity * (1f + accelerationMod.x), rotateDelta);
+        
+        velocity += gravityDirection * Mathf.Min(Mathf.Max(0, maxGravity + velocity.y), gravityVelocity * deltaTime)
+            * (PlayerController.Launched ? 1f : 20f) * gravityMultiplier;
+
+        if (planeDirection != Vector3.zero && !onGround)
+        {
+            velocity += gravityDirection * Vector3.Dot(crossForward, planeDirection) 
+                * Mathf.Min(Mathf.Max(0, maxGravity + velocity.y), gravityVelocity * deltaTime) 
+                * planeModificator * gravityMultiplier;
+        }
+
+        if (!PlayerController.Launched)
+        {
+            velocity.x = 0;
+            if (onGround) velocity.y = 0;
+            velocity.z = 0;
+        }
+        
+        Debug.DrawRay(transform.position, velocity * 999f, Color.red);
+        SetVelocity(velocity);
+    }
+
+    void SetVelocity(Vector3 velocity)
+    {
         Body.velocity = velocity;
+        
+        if (ConnectedParts == null) return;
+        
+        for (int i = 0; i < ConnectedParts.Count; i++)
+        {
+            if (ConnectedParts[i])
+            {
+                ConnectedParts[i].Body.velocity = velocity;
+            }
+        }
+    }
+
+    void SetVisuals(bool state)
+    {
+        if (ConnectedParts == null) return;
+        
+        for(int i = 0; i < ConnectedParts.Count; i++)
+        {
+            if (ConnectedParts[i])
+            {
+                ConnectedParts[i].VisualMode = state;
+            }
+        }
+    }
+
+    private Quaternion[] defaultRotation;
+
+    void SetRotation(Quaternion rotation)
+    {
+        Body.MoveRotation(rotation);
+        
+        // if (ConnectedParts == null) return;
+        //
+        // if (defaultRotation == null)
+        // {
+        //     defaultRotation = new Quaternion[ConnectedParts.Count];
+        //     for (int i = 0; i < ConnectedParts.Count; i++)
+        //     {
+        //         defaultRotation[i] = ConnectedParts[i].transform.localRotation;
+        //     }
+        // }
+        //
+        // Quaternion rotate;
+        // for (int i = 0; i < ConnectedParts.Count; i++)
+        // {
+        //     if (ConnectedParts[i])
+        //     {
+        //         rotate = Quaternion.Euler(rotation.eulerAngles + defaultRotation[i].eulerAngles);
+        //         ConnectedParts[i].Body.MoveRotation(rotate);
+        //     }
+        // }
     }
     
     void OnDestroy()
@@ -350,6 +505,21 @@ public class AircraftEngine : MonoBehaviour
         }
         
         return 0f;
+    }
+    
+    private float getAcceleration(float accelerationMultiplier = 1f, float speedMultiplier = 1f)
+    {
+        if (getMotor() == 0 || speedMultiplier == 0)
+        {
+            return brakeStrength;
+        }
+        else
+        {
+            float accelerationCurveDelta = Mathf.Abs(forwardVelocity) / (getMaxSpeed() * speedMultiplier);
+            if (accelerationCurveDelta > 1) return -getMaxAcceleration() * accelerationMultiplier;
+            if (accelerationCurveDelta < 0) return getMaxAcceleration() * accelerationMultiplier;
+            return accelerationCurve.Evaluate(accelerationCurveDelta) * getMaxAcceleration() * accelerationMultiplier;
+        }
     }
     
     private int getZeroSign(float value)

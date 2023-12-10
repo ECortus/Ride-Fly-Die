@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 85263286af5c5bd4da9c394b28721d10, type: 3}
   m_Name: Wings_Parameters
   m_EditorClassIdentifier: 
-  defaultFlyModifier: 0.077
-  multiple: 1.1
+  defaultFlyModifier: 0.4
+  multiple: 1.2

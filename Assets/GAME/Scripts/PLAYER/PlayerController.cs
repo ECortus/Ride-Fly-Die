@@ -30,8 +30,15 @@ public class PlayerController : MonoBehaviour
     
     public float GetDistanceToGround() => engine.GetDistanceToGround();
 
-    public void AddModifier(ParametersModifier mod) => engine.AddModifier(mod);
-    public void RemoveModifier(ParametersModifier mod) => engine.RemoveModifier(mod);
+    public void AddPart(Part part)
+    {
+        engine.AddPart(part);
+    }
+    
+    public void RemovePart(Part part)
+    {
+        engine.RemovePart(part);
+    }
 
     void Awake()
     {
@@ -47,25 +54,23 @@ public class PlayerController : MonoBehaviour
         GameManager.OnMergeGame += TakeControl;
         GameManager.OnMergeGame += ResetBody;
         GameManager.OnMergeGame += Repair;
-        GameManager.OnMergeGame += engine.ClearModifiers;
 
         GameManager.OnGameFinish += Crash;
-
-        partsArray = new Part[0];
     }
 
     public void Launch(float percent = 1f, float angle = 0f)
     {
         Launched = true;
         OffControl();
+        
+        engine.inputPlaneRotate = 0;
+        startMousePosition = Vector3.positiveInfinity;
 
         Vector3 direction = DirectionFromAngle(180f, angle);
-        // Vector3 direction = -Forward;
+        // Vector3 direction = Forward;
         direction.y = 0;
-        engine.AccelerateBody(direction, percent);
+        engine.AccelerateBody(-direction, percent);
     }
-
-    private Part[] partsArray;
 
     private Vector3 startMousePosition, currentMousePosition;
     private Vector3 mouseDirection => (currentMousePosition - startMousePosition).normalized;
@@ -80,7 +85,8 @@ public class PlayerController : MonoBehaviour
             {
                 startMousePosition = Input.mousePosition;
             }
-            else if (Input.GetMouseButton(0) && startMousePosition != Vector3.positiveInfinity)
+            
+            if (Input.GetMouseButton(0) && startMousePosition != Vector3.zero)
             {
                 currentMousePosition = Input.mousePosition;
                 mouseRotateInput = ((currentMousePosition - startMousePosition).magnitude / 100f) / mouseLength;
@@ -89,39 +95,35 @@ public class PlayerController : MonoBehaviour
                 {
                     mouseRotateInput *= -1f;
                 }
-                
-                engine.inputPlaneRotate = Mathf.Clamp(engine.inputPlaneRotate, -1f, 1f);
+
+                engine.inputPlaneRotate = Mathf.Clamp(mouseRotateInput, -1f, 1f);
                 engine.setMotor(2);
-                
-                SetPartVisuals(true);
+                return;
             }
-            else
+            
+            if (Input.GetMouseButtonUp(0))
             {
-                engine.inputPlaneRotate = 0f;
-                startMousePosition = Vector3.positiveInfinity;
+                ResetMouse();
                 engine.setMotor(0);
-                
-                SetPartVisuals(false);
             }
+            
+            ResetMouse();
+            engine.setMotor(0);
         }
         else
         {
+            ResetMouse();
             engine.setMotor(0);
-            SetPartVisuals(false);
         }
     }
 
-    void SetPartVisuals(bool state)
+    void ResetMouse()
     {
-        foreach (var VARIABLE in partsArray)
-        {
-            if (VARIABLE)
-            {
-                VARIABLE.VisualMode = state;
-            }
-        }
+        engine.inputPlaneRotate = 0;
+        startMousePosition = Vector3.zero;
+        currentMousePosition = Vector3.zero;
     }
-
+    
     public void SpawnToPos(Vector3 pos)
     {
         Body.transform.position = pos;
@@ -130,7 +132,7 @@ public class PlayerController : MonoBehaviour
 
     void CorrectSphereColliderCenter()
     {
-        Vector3 center = new Vector3(0f, -0.51f, 0f);
+        Vector3 center = new Vector3(0f, -0.5f, 0f);
         int index = PlayerGrid.Instance.MainIndex;
 
         GridCell[] cells = PlayerGrid.Instance._cells;
@@ -179,10 +181,14 @@ public class PlayerController : MonoBehaviour
         CorrectSphereColliderCenter();
         
         Body.isKinematic = false;
+        
+        Body.velocity = Vector3.zero;
+        Body.angularVelocity = Vector3.zero;
+        
         engine.enabled = true;
         OffControl();
 
-        partsArray = GetComponentsInChildren<Part>();
+        // engine.SetParts(GetComponentsInChildren<Part>());
         
         // Body.velocity = Vector3.zero;
         // Body.angularVelocity = Vector3.zero;
@@ -210,8 +216,10 @@ public class PlayerController : MonoBehaviour
     {
         Body.isKinematic = true;
         
-        Body.transform.eulerAngles = new Vector3(0, 180, 0);
-        transform.eulerAngles = new Vector3(0, 180, 0);
+        engine.inputPlaneRotate = 0;
+        engine.ClearParts();
+        
+        Body.transform.rotation = Quaternion.Euler(new Vector3(0, 180f, 0));
     }
     
     private Vector3 DirectionFromAngle(float eulerY, float angleInDegrees)

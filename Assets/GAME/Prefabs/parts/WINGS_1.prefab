@@ -667,7 +667,7 @@ GameObject:
   - component: {fileID: 5237559752669389958}
   - component: {fileID: 975173238331299067}
   - component: {fileID: -2795259974104816710}
-  - component: {fileID: 8757045338796825304}
+  - component: {fileID: 3188719632206565464}
   m_Layer: 12
   m_Name: WINGS_1
   m_TagString: Untagged
@@ -708,7 +708,7 @@ MonoBehaviour:
     type: 2}
   <Level>k__BackingField: 0
   <Mass>k__BackingField: 0.5
-  <Sprite>k__BackingField: {fileID: 21300000, guid: 504e726956b7d374bba55bb0f74a53e0,
+  <Sprite>k__BackingField: {fileID: 21300000, guid: 72babe0491f3a1246bd33b6992097ac4,
     type: 3}
   <BlockMerge>k__BackingField: 0
   <BlockMove>k__BackingField: 0
@@ -743,7 +743,8 @@ MonoBehaviour:
   _currentMergeCell: {fileID: 0}
   _currentGridCell: {fileID: 0}
   pars: {fileID: 11400000, guid: 8d643be9bd5bd7343beacfb197270e48, type: 2}
-  trails: []
+  trail1: {fileID: 9215228142470930346}
+  trial2: {fileID: 8191761958847340303}
 --- !u!54 &-2795259974104816710
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -771,8 +772,8 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!59 &8757045338796825304
-HingeJoint:
+--- !u!138 &3188719632206565464
+FixedJoint:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -780,30 +781,6 @@ HingeJoint:
   m_GameObject: {fileID: 4055007072039822592}
   m_ConnectedBody: {fileID: 0}
   m_ConnectedArticulationBody: {fileID: 0}
-  m_Anchor: {x: 0, y: 0, z: 0}
-  m_Axis: {x: 1, y: 0, z: 0}
-  m_AutoConfigureConnectedAnchor: 1
-  m_ConnectedAnchor: {x: 0, y: 0, z: 0}
-  serializedVersion: 2
-  m_UseSpring: 1
-  m_Spring:
-    spring: 7000
-    damper: 300
-    targetPosition: 0
-  m_UseMotor: 0
-  m_Motor:
-    targetVelocity: 0
-    force: 0
-    freeSpin: 0
-  m_UseLimits: 0
-  m_ExtendedLimits: 0
-  m_UseAcceleration: 0
-  m_Limits:
-    min: 0
-    max: 0
-    bounciness: 0
-    bounceMinVelocity: 0.2
-    contactDistance: 0
   m_BreakForce: Infinity
   m_BreakTorque: Infinity
   m_EnableCollision: 0

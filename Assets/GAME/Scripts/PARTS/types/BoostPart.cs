@@ -37,17 +37,22 @@ public class BoostPart : Part
         }
     }
     
+    private Vector3 direction => transform.forward;
+    
     public override ParametersModifier GetFlyParameters()
     {
-        Vector3 dir = Vector3.zero;
-        dir = transform.forward;
-        
         ParametersModifier modif = new ParametersModifier(
             ModifierType.Boost,
             pars.GetMotorForce(Level),
-            dir
+            direction
         );
 
         return modif;
     }
+    
+    // private void OnDrawGizmos()
+    // {
+    //     Gizmos.color = Color.magenta;
+    //     Gizmos.DrawRay(transform.position, direction * 999f);
+    // }
 }

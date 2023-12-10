@@ -145,7 +145,7 @@ GameObject:
   - component: {fileID: 1465694228352659193}
   - component: {fileID: 1237340488436024338}
   - component: {fileID: -8238671334592053502}
-  - component: {fileID: -5211546220037488002}
+  - component: {fileID: 6121544174377319656}
   m_Layer: 12
   m_Name: WINGS_3
   m_TagString: Untagged
@@ -186,7 +186,7 @@ MonoBehaviour:
     type: 2}
   <Level>k__BackingField: 2
   <Mass>k__BackingField: 0.5
-  <Sprite>k__BackingField: {fileID: 21300000, guid: 504e726956b7d374bba55bb0f74a53e0,
+  <Sprite>k__BackingField: {fileID: 21300000, guid: fc41e35fd62e9b949a23074da2fcece1,
     type: 3}
   <BlockMerge>k__BackingField: 0
   <BlockMove>k__BackingField: 0
@@ -221,7 +221,8 @@ MonoBehaviour:
   _currentMergeCell: {fileID: 0}
   _currentGridCell: {fileID: 0}
   pars: {fileID: 11400000, guid: 8d643be9bd5bd7343beacfb197270e48, type: 2}
-  trails: []
+  trail1: {fileID: 4019792855557256345}
+  trial2: {fileID: 1026814757135065429}
 --- !u!54 &-8238671334592053502
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -249,8 +250,8 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!59 &-5211546220037488002
-HingeJoint:
+--- !u!138 &6121544174377319656
+FixedJoint:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -258,30 +259,6 @@ HingeJoint:
   m_GameObject: {fileID: 292228323937160428}
   m_ConnectedBody: {fileID: 0}
   m_ConnectedArticulationBody: {fileID: 0}
-  m_Anchor: {x: 0, y: 0, z: 0}
-  m_Axis: {x: 1, y: 0, z: 0}
-  m_AutoConfigureConnectedAnchor: 1
-  m_ConnectedAnchor: {x: 0, y: 0, z: 0}
-  serializedVersion: 2
-  m_UseSpring: 1
-  m_Spring:
-    spring: 7000
-    damper: 300
-    targetPosition: 0
-  m_UseMotor: 0
-  m_Motor:
-    targetVelocity: 0
-    force: 0
-    freeSpin: 0
-  m_UseLimits: 0
-  m_ExtendedLimits: 0
-  m_UseAcceleration: 0
-  m_Limits:
-    min: 0
-    max: 0
-    bounciness: 0
-    bounceMinVelocity: 0.2
-    contactDistance: 0
   m_BreakForce: Infinity
   m_BreakTorque: Infinity
   m_EnableCollision: 0

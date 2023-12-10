@@ -40,7 +40,7 @@ public class LaunchController : MonoBehaviour
 
     private Vector3 velocity;
     
-    void FixedUpdate()
+    void Update()
     {
         if (!PlayerController.Launched && GameManager.GameStarted)
         {
@@ -54,7 +54,8 @@ public class LaunchController : MonoBehaviour
             {
                 startMousePos = Input.mousePosition;
             }
-            else if (Input.GetMouseButton(0))
+            
+            if (Input.GetMouseButton(0) && startMousePos != Vector2.zero)
             {
                 currentMousePos = Input.mousePosition;
                 
@@ -98,7 +99,8 @@ public class LaunchController : MonoBehaviour
                     SetText(LaunchPercent);
                 }
             }
-            else if (Input.GetMouseButtonUp(0))
+            
+            if (Input.GetMouseButtonUp(0))
             {
                 if (distanceStartCurrent / maxSpace > minPercent)
                 {
@@ -116,6 +118,8 @@ public class LaunchController : MonoBehaviour
     
     void StartLaunch()
     {
+        ResetLaunch();
+        
         defaultPos = fromLaunchCoord.position;
         defaultPos.y = toLaunch.transform.position.y;
         counterPercent.gameObject.SetActive(true);
@@ -166,6 +170,9 @@ public class LaunchController : MonoBehaviour
 
     void ResetLaunch()
     {
+        startMousePos = Vector2.zero;
+        currentMousePos = Vector2.zero;
+        
         dirStartCurrent3 = Vector3.zero;
         angle = 0;
         currentPos = Vector3.zero;

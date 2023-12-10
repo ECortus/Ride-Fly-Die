@@ -129,7 +129,15 @@ public class PlayerGrid : MonoBehaviour
             part = cell.Part;
             if (part)
             {
-                // part.GetGridCell().UnRegistry();
+                if (part.Type.Category != PartCategory.Cabin && part.Type.Category != PartCategory.Grid)
+                {
+                    Debug.Log("changed to merge");
+                    if (MergeGrid.FreeCount > 0)
+                    {
+                        MergeGrid.Instance.SpawnPart(part.Type.GetPart(part.Level));
+                    }
+                }
+                
                 part.DestroyPart();
             }
             

@@ -1124,7 +1124,7 @@ GameObject:
   - component: {fileID: 4884530188518079720}
   - component: {fileID: 4617822703451598027}
   - component: {fileID: -1730276420829592915}
-  - component: {fileID: 3618529207053692953}
+  - component: {fileID: 2470577993855960838}
   m_Layer: 12
   m_Name: WINGS_2
   m_TagString: Untagged
@@ -1165,7 +1165,7 @@ MonoBehaviour:
     type: 2}
   <Level>k__BackingField: 1
   <Mass>k__BackingField: 0.5
-  <Sprite>k__BackingField: {fileID: 21300000, guid: 504e726956b7d374bba55bb0f74a53e0,
+  <Sprite>k__BackingField: {fileID: 21300000, guid: 2d5aeaaf095d1d9419dc87e6f37b2fd4,
     type: 3}
   <BlockMerge>k__BackingField: 0
   <BlockMove>k__BackingField: 0
@@ -1200,7 +1200,8 @@ MonoBehaviour:
   _currentMergeCell: {fileID: 0}
   _currentGridCell: {fileID: 0}
   pars: {fileID: 11400000, guid: 8d643be9bd5bd7343beacfb197270e48, type: 2}
-  trails: []
+  trail1: {fileID: 4990686698319653736}
+  trial2: {fileID: 5292620542628592837}
 --- !u!54 &-1730276420829592915
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -1228,8 +1229,8 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!59 &3618529207053692953
-HingeJoint:
+--- !u!138 &2470577993855960838
+FixedJoint:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -1237,30 +1238,6 @@ HingeJoint:
   m_GameObject: {fileID: 5208131562064784962}
   m_ConnectedBody: {fileID: 0}
   m_ConnectedArticulationBody: {fileID: 0}
-  m_Anchor: {x: 0, y: 0, z: 0}
-  m_Axis: {x: 1, y: 0, z: 0}
-  m_AutoConfigureConnectedAnchor: 1
-  m_ConnectedAnchor: {x: 0, y: 0, z: 0}
-  serializedVersion: 2
-  m_UseSpring: 1
-  m_Spring:
-    spring: 7000
-    damper: 300
-    targetPosition: 0
-  m_UseMotor: 0
-  m_Motor:
-    targetVelocity: 0
-    force: 0
-    freeSpin: 0
-  m_UseLimits: 0
-  m_ExtendedLimits: 0
-  m_UseAcceleration: 0
-  m_Limits:
-    min: 0
-    max: 0
-    bounciness: 0
-    bounceMinVelocity: 0.2
-    contactDistance: 0
   m_BreakForce: Infinity
   m_BreakTorque: Infinity
   m_EnableCollision: 0

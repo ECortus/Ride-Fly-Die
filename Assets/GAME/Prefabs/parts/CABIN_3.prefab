@@ -622,8 +622,7 @@ GameObject:
   - component: {fileID: 4945128712615764494}
   - component: {fileID: -4069220058016421539}
   - component: {fileID: -6400098863439245619}
-  - component: {fileID: -6714286252516349424}
-  - component: {fileID: 7319527297580540170}
+  - component: {fileID: -264666545481542896}
   m_Layer: 12
   m_Name: CABIN_3
   m_TagString: Untagged
@@ -683,7 +682,7 @@ MonoBehaviour:
       Front: 0
   _currentMergeCell: {fileID: 0}
   _currentGridCell: {fileID: 0}
-  doll: {fileID: 0}
+  doll: {fileID: 3174995817752689666}
 --- !u!54 &-6400098863439245619
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -711,8 +710,8 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!59 &-6714286252516349424
-HingeJoint:
+--- !u!138 &-264666545481542896
+FixedJoint:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -720,57 +719,12 @@ HingeJoint:
   m_GameObject: {fileID: 6480534283296846638}
   m_ConnectedBody: {fileID: 0}
   m_ConnectedArticulationBody: {fileID: 0}
-  m_Anchor: {x: 0, y: 0, z: 0}
-  m_Axis: {x: 1, y: 0, z: 0}
-  m_AutoConfigureConnectedAnchor: 1
-  m_ConnectedAnchor: {x: 0, y: 0, z: 0}
-  serializedVersion: 2
-  m_UseSpring: 1
-  m_Spring:
-    spring: 7000
-    damper: 300
-    targetPosition: 0
-  m_UseMotor: 0
-  m_Motor:
-    targetVelocity: 0
-    force: 0
-    freeSpin: 0
-  m_UseLimits: 0
-  m_ExtendedLimits: 0
-  m_UseAcceleration: 0
-  m_Limits:
-    min: 0
-    max: 0
-    bounciness: 0
-    bounceMinVelocity: 0.2
-    contactDistance: 0
   m_BreakForce: Infinity
   m_BreakTorque: Infinity
   m_EnableCollision: 0
   m_EnablePreprocessing: 1
   m_MassScale: 1
   m_ConnectedMassScale: 1
---- !u!135 &7319527297580540170
-SphereCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6480534283296846638}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Radius: 0.5
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &7083858005079541955
 GameObject:
   m_ObjectHideFlags: 0
@@ -1300,3 +1254,15 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 8604110417155291193}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &3174995817752689666 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6586559576457905211, guid: 1f59995d868ac3443adc1a1dda5d939c,
+    type: 3}
+  m_PrefabInstance: {fileID: 8604110417155291193}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ed6ab83ba9df65447b8267ae37e3b67c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

@@ -69,13 +69,13 @@ public class CameraFollowController : MonoBehaviour
     
     void Update()
     {
-        if (target != null)
+        if (target)
         {
             cam.transform.localPosition = Vector3.zero;
             cam.transform.localEulerAngles = Vector3.zero;
             cam.fieldOfView = 60;
             
-            transform.position = Vector3.Slerp(transform.position, position, speedMove * Time.deltaTime);
+            transform.position = Vector3.Lerp(transform.position, position, speedMove * Time.deltaTime);
         }
     }
 }

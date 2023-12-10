@@ -69,7 +69,7 @@ public class MergeCell : MonoBehaviour
             levelText.transform.parent.gameObject.SetActive(true);
 
             spriteShow.sprite = Part.Sprite;
-            levelText.text = Part.Level.ToString();
+            levelText.text = (Part.Level + 1).ToString();
         }
         else
         {

@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: LaunchPowerObject
   m_EditorClassIdentifier: 
   <MaxLevel>k__BackingField: 999
-  powerDefault: 1500
-  powerMultiple: 1.1
+  powerDefault: 10
+  powerMultiple: 1.15
   defaultCost: 25
   multipleCostPerLevel: 1.8

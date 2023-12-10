@@ -25,17 +25,8 @@ MonoBehaviour:
       IndexOffset: {x: 0, y: 0}
     - Type: {fileID: 11400000, guid: c4bac62e3594fee478a0dd0eca05ebbf, type: 2}
       IndexOffset: {x: -1, y: 0}
-    LevelsOf: 0
-    RequireDistance: 1000
-  - Parts:
-    - Type: {fileID: 11400000, guid: 7172cec7db3e97e46bf4169570ece56a, type: 2}
-      IndexOffset: {x: 0, y: 0}
-    - Type: {fileID: 11400000, guid: c4bac62e3594fee478a0dd0eca05ebbf, type: 2}
-      IndexOffset: {x: -1, y: 0}
-    - Type: {fileID: 11400000, guid: c4bac62e3594fee478a0dd0eca05ebbf, type: 2}
-      IndexOffset: {x: 1, y: 0}
-    LevelsOf: 0
-    RequireDistance: 1500
+    LevelsOf: 1
+    RequireDistance: 500
   - Parts:
     - Type: {fileID: 11400000, guid: 7172cec7db3e97e46bf4169570ece56a, type: 2}
       IndexOffset: {x: 0, y: 0}
@@ -44,7 +35,16 @@ MonoBehaviour:
     - Type: {fileID: 11400000, guid: c4bac62e3594fee478a0dd0eca05ebbf, type: 2}
       IndexOffset: {x: 1, y: 0}
     LevelsOf: 1
-    RequireDistance: 2000
+    RequireDistance: 1250
+  - Parts:
+    - Type: {fileID: 11400000, guid: 7172cec7db3e97e46bf4169570ece56a, type: 2}
+      IndexOffset: {x: 0, y: 0}
+    - Type: {fileID: 11400000, guid: c4bac62e3594fee478a0dd0eca05ebbf, type: 2}
+      IndexOffset: {x: -1, y: 0}
+    - Type: {fileID: 11400000, guid: c4bac62e3594fee478a0dd0eca05ebbf, type: 2}
+      IndexOffset: {x: 1, y: 0}
+    LevelsOf: 0
+    RequireDistance: 2500
   - Parts:
     - Type: {fileID: 11400000, guid: 7172cec7db3e97e46bf4169570ece56a, type: 2}
       IndexOffset: {x: 0, y: 0}

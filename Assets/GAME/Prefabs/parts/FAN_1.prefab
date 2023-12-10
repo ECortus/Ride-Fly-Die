@@ -832,7 +832,7 @@ GameObject:
   - component: {fileID: 4878567824234576176}
   - component: {fileID: 7929257974113676610}
   - component: {fileID: -2848551467067820673}
-  - component: {fileID: -6955370099602774332}
+  - component: {fileID: 285784967240788838}
   m_Layer: 12
   m_Name: FAN_1
   m_TagString: Untagged
@@ -873,7 +873,7 @@ MonoBehaviour:
     type: 2}
   <Level>k__BackingField: 0
   <Mass>k__BackingField: 1
-  <Sprite>k__BackingField: {fileID: 21300000, guid: 200201c4bf960c949afb4e585d0dc5d8,
+  <Sprite>k__BackingField: {fileID: 21300000, guid: 8a330c8bacd52f3448cc2a621a0c6b16,
     type: 3}
   <BlockMerge>k__BackingField: 0
   <BlockMove>k__BackingField: 0
@@ -934,8 +934,8 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!59 &-6955370099602774332
-HingeJoint:
+--- !u!138 &285784967240788838
+FixedJoint:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -943,30 +943,6 @@ HingeJoint:
   m_GameObject: {fileID: 7914600944201004635}
   m_ConnectedBody: {fileID: 0}
   m_ConnectedArticulationBody: {fileID: 0}
-  m_Anchor: {x: 0, y: 0, z: 0}
-  m_Axis: {x: 1, y: 0, z: 0}
-  m_AutoConfigureConnectedAnchor: 1
-  m_ConnectedAnchor: {x: 0, y: 0, z: 0}
-  serializedVersion: 2
-  m_UseSpring: 1
-  m_Spring:
-    spring: 7000
-    damper: 300
-    targetPosition: 0
-  m_UseMotor: 0
-  m_Motor:
-    targetVelocity: 0
-    force: 0
-    freeSpin: 0
-  m_UseLimits: 0
-  m_ExtendedLimits: 0
-  m_UseAcceleration: 0
-  m_Limits:
-    min: 0
-    max: 0
-    bounciness: 0
-    bounceMinVelocity: 0.2
-    contactDistance: 0
   m_BreakForce: Infinity
   m_BreakTorque: Infinity
   m_EnableCollision: 0

@@ -22,8 +22,8 @@ public abstract class Part : MonoBehaviour
     
     public PartCategory Category => Type.Category;
 
-    private Rigidbody Body { get; set; }
-    private HingeJoint Joint;
+    public Rigidbody Body { get; set; }
+    private FixedJoint Joint;
     
     private PartOrientation Orientation = PartOrientation.Default;
     public void SetOrientation(PartOrientation ort)
@@ -73,7 +73,6 @@ public abstract class Part : MonoBehaviour
 
     private static bool _blockAll;
     private static Part _dragedPart;
-    private static Part _canMovePart;
 
     public static Part DragedPart => _dragedPart;
     
@@ -81,21 +80,16 @@ public abstract class Part : MonoBehaviour
     {
         _dragedPart = part;
     }
-    
-    public static void SetCanMovePart(Part part)
-    {
-        _canMovePart = part;
-    }
 
     public static void SetBlock(bool block)
     {
         _blockAll = block;
     }
 
-    private GameObject Object;
-    private GameObject inGameObject;
-    private GameObject onGridObject;
-    private GameObject additionalObject;
+    protected GameObject Object;
+    protected GameObject inGameObject;
+    protected GameObject onGridObject;
+    protected GameObject additionalObject;
     
     private PartDestrict Destrict;
     private TextMeshProUGUI lvlText;
@@ -135,17 +129,17 @@ public abstract class Part : MonoBehaviour
         Body.isKinematic = false;
         Part neighbor;
 
-        Body.interpolation = RigidbodyInterpolation.Extrapolate;
+        Body.interpolation = RigidbodyInterpolation.None;
         Body.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
 
         if (HaveRequireNeighbors(out neighbor) || Type.Category == PartCategory.Cabin || Type.Category == PartCategory.Grid)
         {
             Body.useGravity = false;
             
-            if (Type.Category != PartCategory.Cabin) Joint.connectedBody = neighbor.Body;
-            else Joint.connectedBody = PlayerController.Instance.Body;
-
-            Joint.axis = new Vector3(0, 0, 1);
+            // if (Type.Category != PartCategory.Cabin) Joint.connectedBody = neighbor.Body;
+            // else Joint.connectedBody = PlayerController.Instance.Body;
+            
+            Joint.connectedBody = PlayerController.Instance.Body;
             
             AddMod();
         }
@@ -161,12 +155,12 @@ public abstract class Part : MonoBehaviour
 
     void AddMod()
     {
-        PlayerController.Instance.AddModifier(GetFlyParameters());
+        PlayerController.Instance.AddPart(this);
     }
     
     void RemoveMod()
     {
-        PlayerController.Instance.RemoveModifier(GetFlyParameters());
+        PlayerController.Instance.RemovePart(this);
     }
     
     [ContextMenu("Write default destrict")]
@@ -230,7 +224,7 @@ public abstract class Part : MonoBehaviour
         RepairPart();
 
         Body = GetComponent<Rigidbody>();
-        Joint = GetComponent<HingeJoint>();
+        Joint = GetComponent<FixedJoint>();
         
         Body.isKinematic = true;
         Body.useGravity = false;
@@ -559,12 +553,7 @@ public abstract class Part : MonoBehaviour
                 else if (selectedCell)
                 {
                     MergeCell currentCell = _currentMergeCell;
-                    if (!currentCell)
-                    {
-                        selectedCell.Registry(this);
-                        SetCell(selectedCell);
-                    }
-                    else if (selectedCell != currentCell)
+                    if (!currentCell || selectedCell != currentCell)
                     {
                         Part mergePart = selectedCell.Part;
                         if (mergePart)
@@ -573,7 +562,9 @@ public abstract class Part : MonoBehaviour
                             {
                                 SetDragedPart(null);
                                 
-                                currentCell.UnRegistry();
+                                if(currentCell) currentCell.UnRegistry();
+                                else _currentGridCell.UnRegistry();
+                                
                                 mergePart._currentMergeCell.UnRegistry();
 
                                 Part part = Type.GetPart(Level + 1);

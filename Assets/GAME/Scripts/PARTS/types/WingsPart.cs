@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -7,42 +8,38 @@ public class WingsPart : Part
     [Space]
     [SerializeField] private WingsParameters pars;
 
-    [SerializeField] private TrailRenderer[] trails;
-
-    void Start()
-    {
-        trails = GetComponentsInChildren<TrailRenderer>(true);
-    }
+    [SerializeField] private TrailRenderer trail1, trial2;
 
     private void FixedUpdate()
     {
-        if (!GameManager.GameStarted || !VisualMode)
+        if (GameManager.GameStarted && PlayerController.Launched)
         {
-            foreach (var VARIABLE in trails)
-            {
-                VARIABLE.enabled = false;
-            }
+            trail1.enabled = true;
+            trial2.enabled = additionalObject.activeSelf;
         }
         else
         {
-            foreach (var VARIABLE in trails)
-            {
-                VARIABLE.enabled = true;
-            }
+            trail1.enabled = false;
+            trial2.enabled = false;
         }
     }
 
+    private Vector3 direction => -transform.up;
+
     public override ParametersModifier GetFlyParameters()
     {
-        Vector3 dir = Vector3.zero;
-        dir = -transform.up;
-        
         ParametersModifier modif = new ParametersModifier(
             ModifierType.Wings,
             pars.GetFlyModifier(Level),
-            dir
+            direction
         );
 
         return modif;
     }
+
+    // private void OnDrawGizmos()
+    // {
+    //     Gizmos.color = Color.magenta;
+    //     Gizmos.DrawRay(transform.position, direction * 99999f);
+    // }
 }

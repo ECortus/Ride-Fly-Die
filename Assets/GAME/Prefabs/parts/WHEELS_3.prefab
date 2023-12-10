@@ -1444,7 +1444,7 @@ GameObject:
   - component: {fileID: 9100930627278545617}
   - component: {fileID: 1402271240051248704}
   - component: {fileID: 3804590453044289072}
-  - component: {fileID: -4852823781192757041}
+  - component: {fileID: 746984769129459943}
   m_Layer: 12
   m_Name: WHEELS_3
   m_TagString: Untagged
@@ -1485,7 +1485,7 @@ MonoBehaviour:
     type: 2}
   <Level>k__BackingField: 2
   <Mass>k__BackingField: 1
-  <Sprite>k__BackingField: {fileID: 21300000, guid: 10f201a194750af47a7219b55b89504a,
+  <Sprite>k__BackingField: {fileID: 21300000, guid: ff374ad61b0e41b4b9a4c516563fd542,
     type: 3}
   <BlockMerge>k__BackingField: 0
   <BlockMove>k__BackingField: 0
@@ -1520,7 +1520,7 @@ MonoBehaviour:
   _currentMergeCell: {fileID: 0}
   _currentGridCell: {fileID: 0}
   pars: {fileID: 11400000, guid: 0be6eb095d40a7648bef21542d40b71a, type: 2}
-  rotateSpeed: 280
+  rotateSpeed: -450
   rotateAcceleration: 6
   wheel1: {fileID: 5403315780014143057}
   wheel2: {fileID: 5578809457466727991}
@@ -1551,8 +1551,8 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!59 &-4852823781192757041
-HingeJoint:
+--- !u!138 &746984769129459943
+FixedJoint:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -1560,30 +1560,6 @@ HingeJoint:
   m_GameObject: {fileID: 7144894336330173833}
   m_ConnectedBody: {fileID: 0}
   m_ConnectedArticulationBody: {fileID: 0}
-  m_Anchor: {x: 0, y: 0, z: 0}
-  m_Axis: {x: 1, y: 0, z: 0}
-  m_AutoConfigureConnectedAnchor: 1
-  m_ConnectedAnchor: {x: 0, y: 0, z: 0}
-  serializedVersion: 2
-  m_UseSpring: 1
-  m_Spring:
-    spring: 7000
-    damper: 300
-    targetPosition: 0
-  m_UseMotor: 0
-  m_Motor:
-    targetVelocity: 0
-    force: 0
-    freeSpin: 0
-  m_UseLimits: 0
-  m_ExtendedLimits: 0
-  m_UseAcceleration: 0
-  m_Limits:
-    min: 0
-    max: 0
-    bounciness: 0
-    bounceMinVelocity: 0.2
-    contactDistance: 0
   m_BreakForce: Infinity
   m_BreakTorque: Infinity
   m_EnableCollision: 0
