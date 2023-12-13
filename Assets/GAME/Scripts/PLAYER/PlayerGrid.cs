@@ -10,7 +10,7 @@ public class PlayerGrid : MonoBehaviour
 {
     public static PlayerGrid Instance { get; private set; }
 
-    private GridsUploads Uploads;
+    [SerializeField] private GridsUploads Uploads;
     
     public readonly int Size = 5;// should be odd numbers
     private int Space = 2;
@@ -36,8 +36,6 @@ public class PlayerGrid : MonoBehaviour
     
     [Inject] private void Awake()
     {
-        Uploads = Resources.Load<GridsUploads>("PARTS/GridUploads_v1");
-        
         Instance = this;
         _cells = gridUI.GetComponentsInChildren<GridCell>(true);
 
@@ -47,6 +45,38 @@ public class PlayerGrid : MonoBehaviour
     void OnEnable()
     {
         
+    }
+
+    public int HavePartOfType(PartType type, int lvl = -1)
+    {
+        GridCell cell;
+        Part part;
+        
+        int count = 0;
+        
+        foreach (var VARIABLE in _cells)
+        {
+            cell = VARIABLE;
+            
+            if (cell)
+            {
+                part = cell.Part;
+                if (part && part.Type == type && (lvl == -1 || part.Level == lvl))
+                {
+                    count++;
+                }
+                else
+                {
+                    part = cell.AdditionalPart;
+                    if (part && part.Type == type && (lvl == -1 || part.Level == lvl))
+                    {
+                        count++;
+                    }
+                }
+            }
+        }
+
+        return count;
     }
 
     public Part[] GetPartsByTypes(PartType[] types)

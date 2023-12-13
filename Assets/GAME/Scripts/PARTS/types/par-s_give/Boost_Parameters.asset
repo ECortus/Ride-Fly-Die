@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7049ca3b7a2739f498fd2165e20fe13f, type: 3}
   m_Name: Boost_Parameters
   m_EditorClassIdentifier: 
-  defaultMotorForce: 100
+  defaultMotorForce: 1.1
   multiple: 1.3

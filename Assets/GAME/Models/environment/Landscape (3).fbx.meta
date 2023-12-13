@@ -3,22 +3,7 @@ guid: 11eea3891e214de48b99fd4f615c2da6
 ModelImporter:
   serializedVersion: 22200
   internalIDToNameTable: []
-  externalObjects:
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Ground
-    second: {fileID: 2100000, guid: 545ab57d75c10b9498a7a49f9f6da4c9, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: mat
-    second: {fileID: 2100000, guid: e612b5b21aa57454e9c4b775a3096092, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: pinelogmat
-    second: {fileID: 2100000, guid: e612b5b21aa57454e9c4b775a3096092, type: 2}
+  externalObjects: {}
   materials:
     materialImportMode: 2
     materialName: 0

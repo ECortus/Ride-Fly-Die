@@ -37,7 +37,7 @@ public class BoostPart : Part
         }
     }
     
-    private Vector3 direction => transform.forward;
+    private Vector3 direction => -Vector3.forward * Mathf.Sign(Vector3.Dot(transform.forward, Vector3.forward));
     
     public override ParametersModifier GetFlyParameters()
     {

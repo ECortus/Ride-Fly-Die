@@ -14,7 +14,8 @@ public class WinMenu : MonoBehaviour
     [SerializeField] private TextMeshProUGUI goldText, gemText;
     [SerializeField] private Transform restartButton;
 
-    private RewardForFly rewards;
+    [Space]
+    [SerializeField] private RewardForFly rewards;
     private float flyLength => GameManager.Instance.FlyLength;
     private int goldReward, gemReward;
 
@@ -24,7 +25,6 @@ public class WinMenu : MonoBehaviour
     {
         //GameManager.OnMergeGame += Off;
         GameManager.OnGameFinish += On;
-        rewards = Resources.Load("REWARDS/FlyReward") as RewardForFly;
 
         alpha = menuBg.color.a;
     }

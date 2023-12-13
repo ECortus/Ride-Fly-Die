@@ -16,5 +16,5 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 6ca89a85831c36e46a650f7288c10fc3, type: 2}
   - {fileID: 11400000, guid: 0b9b90665ee80d14e8dae14ed6fcc8fb, type: 2}
   - {fileID: 11400000, guid: 1566bab67fa6b1540834f6561c1574c2, type: 2}
-  DefaultPrice: 2
+  DefaultPrice: 10
   Multiple: 1.2

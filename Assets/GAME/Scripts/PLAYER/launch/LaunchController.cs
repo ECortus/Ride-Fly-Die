@@ -8,6 +8,7 @@ public class LaunchController : MonoBehaviour
 {
     [SerializeField] private float maxSpace = 2f;
     [SerializeField] private float maxAngle = 60f;
+    [SerializeField] private float rotateSpeed = 12f;
     [Range(0f, 1f)]
     [SerializeField] private float minPercent = 0.15f;
     
@@ -37,19 +38,11 @@ public class LaunchController : MonoBehaviour
     private float angle;
     private float distanceStartCurrent;
     private float angleToDir;
-
-    private Vector3 velocity;
     
     void Update()
     {
         if (!PlayerController.Launched && GameManager.GameStarted)
         {
-            velocity = toLaunch.Body.velocity;
-            velocity.x = 0;
-            velocity.z = 0;
-            toLaunch.Body.velocity = velocity;
-            toLaunch.Body.angularVelocity = Vector3.zero;
-            
             if (Input.GetMouseButtonDown(0) && (dirStartCurrent3 == Vector3.zero || Vector3.Angle(-Vector3.forward, dirStartCurrent3) <= maxAngle))
             {
                 startMousePos = Input.mousePosition;
@@ -77,6 +70,7 @@ public class LaunchController : MonoBehaviour
                 if (dirStartCurrent3 != Vector3.zero)
                 {
                     angle = Vector3.Angle(-Vector3.forward, dirStartCurrent3);
+                    
                     if (angle > maxAngle / 2)
                     {
                         angleToDir = maxAngle / 2;
@@ -102,7 +96,7 @@ public class LaunchController : MonoBehaviour
             
             if (Input.GetMouseButtonUp(0))
             {
-                if (distanceStartCurrent / maxSpace > minPercent)
+                if (distanceStartCurrent / maxSpace > minPercent && (defaultPos - toLaunch.transform.position).magnitude > distanceStartCurrent - 0.05f)
                 {
                     Launch();
                 }
@@ -132,11 +126,11 @@ public class LaunchController : MonoBehaviour
     {
         counterPercent.gameObject.SetActive(false);
         
-        if (Vector3.Angle(dirStartCurrent3, Vector3.right) <
-            Vector3.Angle(dirStartCurrent3, -Vector3.right))
-        {
-            angle *= -1;
-        }
+        // if (Vector3.Angle(dirStartCurrent3, Vector3.right) <
+        //     Vector3.Angle(dirStartCurrent3, -Vector3.right))
+        // {
+        //     angle *= -1;
+        // }
         
         PlayerController.Instance.Launch(LaunchPercent, angle);
         
@@ -152,10 +146,14 @@ public class LaunchController : MonoBehaviour
         toLaunch.transform.position = pos;
         toLaunch.Body.position = pos;
     }
+    
+    public static Quaternion Rotate { get; private set; }
 
     void SetRot(Vector3 dir)
     {
-        toLaunch.transform.rotation = Quaternion.LookRotation(dir);   
+        // toLaunch.transform.rotation = Quaternion.LookRotation(dir);   
+        // toLaunch.Body.MoveRotation(Quaternion.Lerp(toLaunch.Body.rotation, Quaternion.LookRotation(dir), rotateSpeed * Time.fixedDeltaTime));
+        Rotate = Quaternion.LookRotation(dir);
     }
     
     void ResetPos()

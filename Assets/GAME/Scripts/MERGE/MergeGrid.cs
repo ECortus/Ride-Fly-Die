@@ -17,7 +17,7 @@ public class MergeGrid : MonoBehaviour
     public static int FreeCount => Cells.Count(c => c.Part == null);
     public static IReadOnlyCollection<MergeCell> Cells => Instance._cells;
 
-    private MergeCell[] _cells;
+    [HideInInspector] public MergeCell[] _cells;
     
     [Inject] private void Awake()
     {
@@ -39,6 +39,37 @@ public class MergeGrid : MonoBehaviour
             MergeCell cell = _cells[i];
             cell.Load(i);
         }
+    }
+
+    public void ClearAll()
+    {
+        for (int i = 0; i < _cells.Length; i++)
+        {
+            MergeCell cell = _cells[i];
+            
+            foreach (Transform VARIABLE in cell.transform.GetChild(0))
+            {
+                Destroy(VARIABLE.gameObject);
+            }
+            
+            cell.UnRegistry();
+        }
+    }
+    
+    public int HavePartOfType(PartType type, int lvl = -1)
+    {
+        int count = 0;
+        
+        foreach (var VARIABLE in _cells)
+        {
+            if (VARIABLE && VARIABLE.Part && VARIABLE.Part.Type == type
+                && (lvl == -1 || VARIABLE.Part.Level == lvl))
+            {
+                count++;
+            }
+        }
+
+        return count;
     }
 
     public MergeCell GetFreeCell() => _cells.FirstOrDefault(c => c.Part == null);

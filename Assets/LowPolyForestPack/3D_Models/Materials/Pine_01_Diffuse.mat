@@ -29,13 +29,13 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _AO: 0.2
+    - _AO: 0.84
     - _BaseLight: 1
-    - _Cutoff: 0.787
-    - _Occlusion: 0.83
+    - _Cutoff: 0.9
+    - _Occlusion: 1.05
     - _SquashAmount: 1
     m_Colors:
-    - _Color: {r: 0.9009434, g: 0.973675, b: 1, a: 1}
+    - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _TreeInstanceColor: {r: 1, g: 1, b: 1, a: 1}
     - _TreeInstanceScale: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []

@@ -6,8 +6,8 @@ using System;
 using System.Linq;
 using TMPro.Examples;
 
-// [RequireComponent(typeof(Rigidbody))]
-// [RequireComponent(typeof(SphereCollider))]
+[RequireComponent(typeof(Rigidbody))]
+[RequireComponent(typeof(SphereCollider))]
 
 [ExecuteInEditMode]
 public class AircraftEngine : MonoBehaviour
@@ -44,7 +44,8 @@ public class AircraftEngine : MonoBehaviour
     public float maxSlopeAngle = 50f;
     public float rotateVelocity = 45f;
     public float rotateForce = 35f;
-    public Vector3 globalRotateDelta;
+    public Vector3 globalRotateDeltaOnGround;
+    public Vector3 globalRotateDeltaOffGround;
     public float planeRotateMultiplier = 1.2f;
     public float planeRotateBackMultiplier = 0.75f;
     
@@ -57,6 +58,7 @@ public class AircraftEngine : MonoBehaviour
     public float maxAccelerationForward = 100;
     public float maxSpeedForward = 40;
     public float maxAccelerationReverse = 50;
+    public float boostMultiplierOnGround = 1.5f;
     
     [Space]
     public float maxSpeedReverse = 20;
@@ -144,24 +146,16 @@ public class AircraftEngine : MonoBehaviour
         if (mod.Type == ModifierType.Boost)
         {
             boostDirection += mod.Direction;
-            boostDirection = boostDirection.normalized;
-            
             boostModificator += mod.Force;
         }
         else if (mod.Type == ModifierType.Wheels)
         {
             accelerationDirection += mod.Direction;
-            accelerationDirection = accelerationDirection.normalized;
-            
             accelerationModificator += mod.Force * -Vector3.Dot(transform.forward, mod.Direction);
         }
         else if (mod.Type == ModifierType.Wings)
         {
-            if (!wingsMods.Contains(mod))
-            {
-                wingsMods.Add(mod);
-                FormWings();
-            }
+            FormWings();
         }
     }
 
@@ -174,42 +168,42 @@ public class AircraftEngine : MonoBehaviour
         if (mod.Type == ModifierType.Boost)
         {
             boostDirection -= mod.Direction;
-            boostDirection = boostDirection.normalized;
-            
             boostModificator -= mod.Force;
         }
         else if (mod.Type == ModifierType.Wheels)
         {
             accelerationDirection -= mod.Direction;
-            accelerationDirection = accelerationDirection.normalized;
-            
             accelerationModificator -= mod.Force;
         }
         else if (mod.Type == ModifierType.Wings)
         {
-            if (wingsMods.Contains(mod))
-            {
-                wingsMods.Remove(mod);
-                FormWings();
-            }
+            FormWings();
         }
     }
-
-    private List<ParametersModifier> wingsMods = new List<ParametersModifier>();
 
     void FormWings()
     {
         Vector3 direction = Vector3.zero;
         float force = 0f;
+        int count = 0;
 
-        for (int i = 0; i < wingsMods.Count; i++)
+        ParametersModifier mod;
+
+        for (int i = 0; i < ConnectedParts.Count; i++)
         {
-            direction += wingsMods[i].Direction;
-            force += wingsMods[i].Force;
+            if(!ConnectedParts[i]) continue;
+            
+            mod = ConnectedParts[i].GetFlyParameters();
+            if (mod != null && mod.Type == ModifierType.Wings)
+            {
+                direction += mod.Direction;
+                force += mod.Force;
+                count++;
+            }
         }
         
         planeDirection = direction.normalized;
-        planeModificator = force / wingsMods.Count;
+        planeModificator = force / count;
     }
     
     void Start()
@@ -234,8 +228,11 @@ public class AircraftEngine : MonoBehaviour
     {
         // Body.AddForce(direction * LaunchPower.Power * accelerationModificator * percentForce, ForceMode.Acceleration);
         // Debug.Log(direction * LaunchPower.Power * accelerationModificator * percentForce);
-        Body.rotation = Quaternion.LookRotation(-direction);
-        Body.velocity += direction * LaunchPower.Power * accelerationModificator * percentForce;
+        // Body.velocity += direction * LaunchPower.Power * accelerationModificator * percentForce;
+        
+        Vector3 dir = Body.transform.forward;
+        dir.y = 0f;
+        Body.velocity += -dir * LaunchPower.Power * accelerationModificator * percentForce;
     }
     
     void Update()
@@ -264,7 +261,7 @@ public class AircraftEngine : MonoBehaviour
     void FixedUpdate()
     {
         SetVisuals(!_TakeControl && getMotor() > 0);
-        
+
         if (_TakeControl) return;
         
         averageScale = (transform.lossyScale.x + transform.lossyScale.y + transform.lossyScale.z) / 3f;
@@ -339,13 +336,14 @@ public class AircraftEngine : MonoBehaviour
         rightVelocity = Vector3.Dot(velocity, crossRight);
     
         groundRotation = Quaternion.LookRotation(crossForward, crossUp);
-        bodyVelocityLook = Quaternion.LookRotation(Body.velocity.normalized);
-        // Debug.DrawRay(transform.position, Body.velocity.normalized * 999f, Color.magenta);
 
-        float groundXAngle, groundYAngle, groundZAngle, targetX;
+        float groundXAngle, groundYAngle, groundZAngle, targetX, targetY, targetZ;
+        Vector3 globalRotateDelta = onGround ? globalRotateDeltaOnGround : globalRotateDeltaOffGround;
 
         if (PlayerController.Launched)
         {
+            bodyVelocityLook = Quaternion.LookRotation(Body.velocity.normalized);
+            
             groundXAngle = groundRotation.eulerAngles.x > 180f
                 ? -(360f - groundRotation.eulerAngles.x)
                 : groundRotation.eulerAngles.x;
@@ -355,27 +353,27 @@ public class AircraftEngine : MonoBehaviour
             groundXAngle = Mathf.MoveTowards(groundXAngle,
                 onGround ? groundRotation.eulerAngles.x : -targetX,
                 globalRotateDelta.x * deltaTime);
-            // groundXAngle = groundRotation.eulerAngles.x;
-            
+
+            targetY = 180f;
             groundYAngle = Mathf.MoveTowards(Body.rotation.eulerAngles.y,
-                180f,
+                targetY,
                 globalRotateDelta.y * deltaTime);
             
             groundZAngle = groundRotation.eulerAngles.z > 180f
                 ? -(360f - groundRotation.eulerAngles.z)
                 : groundRotation.eulerAngles.z;
+            targetZ = !onGround ? inputPlaneRotate * maxSlopeAngle : 0f;
             groundZAngle = Mathf.MoveTowards(groundZAngle, 
-                inputPlaneRotate * maxSlopeAngle, 
+                targetZ, 
                 globalRotateDelta.z * deltaTime);
         }
         else
         {
             groundXAngle = 0;
-            groundYAngle = Body.rotation.eulerAngles.y;
+            groundYAngle = LaunchController.Rotate.eulerAngles.y;
             groundZAngle = 0;
         }
 
-        // Debug.Log(new Vector3(groundXAngle, groundYAngle, groundZAngle) + ", " + onGround);
         Quaternion rotation = Quaternion.Euler(groundXAngle, groundYAngle, groundZAngle);
         SetRotation(rotation);
     
@@ -392,25 +390,34 @@ public class AircraftEngine : MonoBehaviour
                 gravityDirection = onGround ? -crossUp : Vector3.down;
                 break;
         }
-        
-        Vector3 accelerationMod = accelerationDirection * accelerationModificator;
+
+        Vector3 motorDirection = onGround
+            ? new Vector3(
+                -Body.transform.TransformDirection(boostDirection.normalized).x,
+                0f,
+                -Body.transform.TransformDirection(boostDirection.normalized).z)
+            : boostDirection.normalized;
+        Vector3 accelerationMod = accelerationDirection.normalized * accelerationModificator;
         
         if (onGround)
         {
-            if (motor == 0 || Mathf.Sign(motor) != Mathf.Sign(forwardVelocity)) velocity -= -crossForward * Mathf.Sign(forwardVelocity) * Mathf.Min(Mathf.Abs(forwardVelocity), forwardFriction * scaleAdjustment * deltaTime);
-            velocity -= crossRight * Mathf.Sign(rightVelocity) * Mathf.Min(Mathf.Abs(rightVelocity), lateralFriction * scaleAdjustment * deltaTime);
-
-            float slopeMultiplier = Mathf.Max(0, (Mathf.Sign(motor) * slopeDelta * slopeFriction * scaleAdjustment + 1f));
-            float accelerationForce = 
-                getAcceleration(0.5f * boostMultiplier * slopeMultiplier, 0.25f * boostMultiplier * slopeMultiplier) * boostModificator;
-            
-            velocity += boostDirection * getMotor() * accelerationForce * accelerationMod.z * deltaTime;
+            // if (motor == 0 || Mathf.Sign(motor) != Mathf.Sign(forwardVelocity))
+            // {
+            //     velocity -= crossForward * Mathf.Sign(forwardVelocity) * Mathf.Min(Mathf.Abs(forwardVelocity), forwardFriction * scaleAdjustment * deltaTime);
+            // }
+            // velocity -= crossRight * Mathf.Sign(rightVelocity) * Mathf.Min(Mathf.Abs(rightVelocity), lateralFriction * scaleAdjustment * deltaTime);
         }
+        
+        float slopeMultiplier = Mathf.Max(0, (Mathf.Sign(motor) * slopeDelta * slopeFriction * scaleAdjustment + 1f));
+        float accelerationForce = 
+            getAcceleration(0.5f * boostMultiplier * slopeMultiplier, 0.25f * boostMultiplier * slopeMultiplier) * boostModificator;
+        
+        velocity += motorDirection * getMotor() * accelerationForce * accelerationMod.z * (onGround ? boostMultiplierOnGround : 1f) * deltaTime;
 
         float rotateMultiplier = Mathf.Abs(inputPlaneRotate) > 0.05f ? planeRotateMultiplier : planeRotateBackMultiplier;
         float rotateDelta = rotateForce * rotateMultiplier * deltaTime;
         
-        velocity.x = Mathf.Lerp(velocity.x, inputPlaneRotate * rotateVelocity * (1f + accelerationMod.x), rotateDelta);
+        velocity.x = Mathf.Lerp(velocity.x, inputPlaneRotate * rotateVelocity, rotateDelta);
         
         velocity += gravityDirection * Mathf.Min(Mathf.Max(0, maxGravity + velocity.y), gravityVelocity * deltaTime)
             * (PlayerController.Launched ? 1f : 20f) * gravityMultiplier;
@@ -429,7 +436,6 @@ public class AircraftEngine : MonoBehaviour
             velocity.z = 0;
         }
         
-        Debug.DrawRay(transform.position, velocity * 999f, Color.red);
         SetVelocity(velocity);
     }
 

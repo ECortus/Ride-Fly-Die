@@ -73,8 +73,8 @@ public class PlayerController : MonoBehaviour
     }
 
     private Vector3 startMousePosition, currentMousePosition;
-    private Vector3 mouseDirection => (currentMousePosition - startMousePosition).normalized;
     private float mouseRotateInput;
+    
     private float mouseLength = 15f;
 
     void FixedUpdate()
@@ -89,12 +89,7 @@ public class PlayerController : MonoBehaviour
             if (Input.GetMouseButton(0) && startMousePosition != Vector3.zero)
             {
                 currentMousePosition = Input.mousePosition;
-                mouseRotateInput = ((currentMousePosition - startMousePosition).magnitude / 100f) / mouseLength;
-                
-                if (Vector3.Angle(mouseDirection, Vector3.right) > Vector3.Angle(mouseDirection, -Vector3.right))
-                {
-                    mouseRotateInput *= -1f;
-                }
+                mouseRotateInput = (currentMousePosition.x - startMousePosition.x) / 100f / mouseLength;
 
                 engine.inputPlaneRotate = Mathf.Clamp(mouseRotateInput, -1f, 1f);
                 engine.setMotor(2);
@@ -119,7 +114,9 @@ public class PlayerController : MonoBehaviour
 
     void ResetMouse()
     {
+        mouseRotateInput = 0;
         engine.inputPlaneRotate = 0;
+        
         startMousePosition = Vector3.zero;
         currentMousePosition = Vector3.zero;
     }

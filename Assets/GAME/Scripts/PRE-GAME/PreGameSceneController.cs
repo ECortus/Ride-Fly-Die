@@ -14,17 +14,6 @@ public class PreGameSceneController : MonoBehaviour
     [SerializeField] private GameObject mergeUI;
     [SerializeField] private GameObject gameUI;
 
-    [Header("additional shit")] 
-    [SerializeField] private GameObject[] planesToOffOnMerge;
-
-    void PlanesOn(bool state)
-    {
-        // foreach (var VARIABLE in planesToOffOnMerge)
-        // {
-        //     VARIABLE.SetActive(state);
-        // }
-    }
-
     private void Awake()
     {
         GameManager.OnMergeGame += MoveToPreGame;
@@ -42,8 +31,6 @@ public class PreGameSceneController : MonoBehaviour
         mergeUI.SetActive(false);
         gameUI.SetActive(false);
         
-        PlanesOn(true);
-        
         CameraFollowController.Instance.SetTarget(null);
         VirtualCameraController.Instance.ChangeVirtualCamera(0);
 
@@ -56,8 +43,6 @@ public class PreGameSceneController : MonoBehaviour
     {
         preGameUI.SetActive(false);
         gameUI.SetActive(false);
-        
-        PlanesOn(false);
         
         CameraFollowController.Instance.SetTarget(null);
         VirtualCameraController.Instance.ChangeVirtualCamera(1);
@@ -74,8 +59,6 @@ public class PreGameSceneController : MonoBehaviour
         Part.SetBlock(true);
         preGameUI.SetActive(false);
         mergeUI.SetActive(false);
-        
-        PlanesOn(true);
         
         VirtualCameraController.Instance.ChangeVirtualCamera(-1);
         // VirtualCameraController.Instance.ChangeVirtualCamera(2);

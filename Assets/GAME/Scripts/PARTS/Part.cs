@@ -553,6 +553,7 @@ public abstract class Part : MonoBehaviour
                 else if (selectedCell)
                 {
                     MergeCell currentCell = _currentMergeCell;
+                    
                     if (!currentCell || selectedCell != currentCell)
                     {
                         Part mergePart = selectedCell.Part;
@@ -563,7 +564,11 @@ public abstract class Part : MonoBehaviour
                                 SetDragedPart(null);
                                 
                                 if(currentCell) currentCell.UnRegistry();
-                                else _currentGridCell.UnRegistry();
+                                else
+                                {
+                                    if(_currentGridCell.AdditionalPart == this) _currentGridCell.UnRegistryAdditional();
+                                    else _currentGridCell.UnRegistry();
+                                }
                                 
                                 mergePart._currentMergeCell.UnRegistry();
 
@@ -572,6 +577,13 @@ public abstract class Part : MonoBehaviour
 
                                 mergePart.DestroyPart();
                                 DestroyPart();
+                                return;
+                            }
+
+                            if (_currentGridCell)
+                            {
+                                PlayerGrid.Instance.SetDefaultPartParsOnGrid(this);
+                                SetDragedPart(null);
                                 return;
                             }
                         }

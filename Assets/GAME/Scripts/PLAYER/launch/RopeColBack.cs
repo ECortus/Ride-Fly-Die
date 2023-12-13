@@ -7,6 +7,12 @@ public class RopeColBack : MonoBehaviour
 {
     private PlayerController player => PlayerController.Instance;
     [SerializeField] private Transform toCol;
+    
+    [Space]
+    [SerializeField] private ParticleSystem particle;
+    [SerializeField] private float particleHeight = -2f;
+    
+    [Space]
     [SerializeField] private LaunchController launch;
     
     void FixedUpdate()
@@ -15,6 +21,12 @@ public class RopeColBack : MonoBehaviour
         {
             toCol.gameObject.SetActive(true);
             toCol.position = player.transform.position - CorrectPos();
+            toCol.rotation = LaunchController.Rotate;
+            
+            particle.transform.position = new Vector3(
+                player.transform.position.x,
+                particleHeight,
+                player.transform.position.z);
         }
         else
         {
@@ -29,9 +41,9 @@ public class RopeColBack : MonoBehaviour
 
         for (int i = 0; i < 3; i++)
         {
-            if (PlayerGrid.Instance.GetByIndex(index - i))
+            if (PlayerGrid.Instance.GetByIndex(index - i).Part)
             {
-                pos = PlayerGrid.Instance.GetRequireLocalPosition(index - i + 1);
+                pos.z = PlayerGrid.Instance.GetRequireLocalPosition(index - i).z;
             }
         }
         

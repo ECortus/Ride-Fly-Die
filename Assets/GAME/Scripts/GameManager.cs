@@ -38,12 +38,26 @@ public class GameManager : MonoBehaviour
     private void Awake()
     {
         Instance = this;
+        
         OnGameFinish += RecordMaxFlyLength;
+        if(!Tutorial.MainCompleted || !Tutorial.MergeCompleted) OnMergeGame += CheckTutorial;
     }
 
     void Start()
     {
         MergeGame();
+    }
+
+    void CheckTutorial()
+    {
+        if (!Tutorial.MainCompleted)
+        {
+            Tutorial.StartMainTutorial();
+        }
+        else if (!Tutorial.MergeCompleted)
+        {
+            Tutorial.StartMergeTutorial();
+        }
     }
     
     public async void MergeGame()

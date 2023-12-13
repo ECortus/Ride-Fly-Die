@@ -13,5 +13,5 @@ MonoBehaviour:
   m_Name: FlyReward
   m_EditorClassIdentifier: 
   currencyUpg: {fileID: 11400000, guid: 282fe698a2c7c234c973f8d0140aa738, type: 2}
-  GoldPerMeter: 0.5
-  GemPerMeter: 0.3
+  GoldPerMeter: 0.1
+  GemPerMeter: 0.05

@@ -8,6 +8,8 @@ using Zenject;
 
 public class BuyPart : MonoBehaviour
 {
+    public static BuyPart Instance { get; private set; }
+    
     [SerializeField] private BuyPartParameters BPT;
 
     private PartType[] TypesToBuy => BPT.Types;
@@ -19,6 +21,20 @@ public class BuyPart : MonoBehaviour
     [SerializeField] private GameObject disableObject;
     [SerializeField] private TextMeshProUGUI costText;
 
+    private static PartType RequirePartToBuy { get; set; }
+    
+    public static void SetPartToBuy(PartType type)
+    {
+        RequirePartToBuy = type;
+    }
+
+    public static void NullPartToBuy() => RequirePartToBuy = null;
+    
+    public static void SetEnable(bool state)
+    {
+        
+    }
+
     private int BuyCount
     {
         get => PlayerPrefs.GetInt("BuyCount", 0);
@@ -29,10 +45,13 @@ public class BuyPart : MonoBehaviour
         }
     }
 
-    private int Cost => Mathf.RoundToInt(defaultPrice * Mathf.Pow(multiple, BuyCount));
+    public static int Cost => Instance._cost;
+    private int _cost => Mathf.RoundToInt(defaultPrice * Mathf.Pow(multiple, BuyCount));
 
     private void Awake()
     {
+        Instance = this;
+        
         Gold.OnValueChange += Refresh;
         MergeCell.OnUpdateState += Refresh;
 
@@ -41,7 +60,7 @@ public class BuyPart : MonoBehaviour
         Refresh();
     }
 
-    public void Refresh()
+    private void Refresh()
     {
         costText.text = $"{Cost}";
         if (Cost <= Gold.Value && MergeGrid.FreeCount != 0)
@@ -58,9 +77,20 @@ public class BuyPart : MonoBehaviour
     {
         BuyCount++;
 
-        PartType type = TypesToBuy[Random.Range(0, TypesToBuy.Length)];
+        PartType type;
+        Part part;
+        
+        if (RequirePartToBuy)
+        {
+            type = RequirePartToBuy;
+        }
+        else
+        {
+            type = TypesToBuy[Random.Range(0, TypesToBuy.Length)];
+        }
+        
         int lvl = Upgrades.PartsBuyLevel;
-        Part part = type.PartLevels[lvl];
+        part = type.PartLevels[lvl];
         
         MergeGrid.Instance.SpawnPart(part);
         Refresh();

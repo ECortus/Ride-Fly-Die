@@ -52,6 +52,7 @@ public class PartDestrict : MonoBehaviour
                     );
                 
                 VARIABLE.AddForce(dir * force, ForceMode.Force);
+                VARIABLE.angularVelocity = dir * 8f;
             }
         }
     }
