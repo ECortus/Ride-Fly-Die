@@ -129,7 +129,7 @@ public class PlayerController : MonoBehaviour
 
     void CorrectSphereColliderCenter()
     {
-        Vector3 center = new Vector3(0f, -0.5f, 0f);
+        Vector3 center = new Vector3(0f, -0.51f, 0f);
         int index = PlayerGrid.Instance.MainIndex;
 
         GridCell[] cells = PlayerGrid.Instance._cells;

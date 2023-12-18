@@ -1,28 +1,43 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Cinemachine;
+using Cysharp.Threading.Tasks;
+using DG.Tweening;
 using TMPro;
 using UnityEngine;
+using Zenject;
 
 public class LaunchController : MonoBehaviour
 {
+    public static LaunchController Instance { get; private set; }
+
+    [SerializeField] private CinemachineBrain brain;
+    
+    [Space]
     [SerializeField] private float maxSpace = 2f;
     [SerializeField] private float maxAngle = 60f;
-    [SerializeField] private float rotateSpeed = 12f;
     [Range(0f, 1f)]
     [SerializeField] private float minPercent = 0.15f;
     
     [Space]
     [SerializeField] private PlayerController toLaunch;
-    [SerializeField] private Transform fromLaunchCoord;
+    
+    [Space]
+    [SerializeField] private GameObject animObject;
+    [SerializeField] private Transform pillar1, pillar2, rope;
+    [SerializeField] private float animTime;
     
     [Space]
     [SerializeField] private TextMeshProUGUI counterPercent;
     
-    private void Awake()
+    [Inject] private void Awake()
     {
         GameManager.OnGameStart += StartLaunch;
-        counterPercent.gameObject.SetActive(false);
+        GameManager.OnMergeGame += Off;
+        Instance = this;
+        
+        Off();
     }
     
     private float LaunchPercent => distanceStartCurrent / maxSpace;
@@ -38,6 +53,8 @@ public class LaunchController : MonoBehaviour
     private float angle;
     private float distanceStartCurrent;
     private float angleToDir;
+
+    public static bool Blocked { get; set; }
     
     void Update()
     {
@@ -67,7 +84,7 @@ public class LaunchController : MonoBehaviour
                     distanceStartCurrent = maxSpace;
                 }
 
-                if (dirStartCurrent3 != Vector3.zero)
+                if (dirStartCurrent3 != Vector3.zero && !Blocked)
                 {
                     angle = Vector3.Angle(-Vector3.forward, dirStartCurrent3);
                     
@@ -85,7 +102,7 @@ public class LaunchController : MonoBehaviour
                         angle = angleToDir;
                     }
                 
-                    currentPos = dirStartCurrent3 * distanceStartCurrent + fromLaunchCoord.position;
+                    currentPos = dirStartCurrent3 * distanceStartCurrent + defaultPos;
                 
                     SetRot(dirStartCurrent3);
                     SetPos(currentPos);
@@ -109,23 +126,48 @@ public class LaunchController : MonoBehaviour
             }
         }
     }
+
+    private async void On()
+    {
+        animObject.SetActive(true);
+
+        rope.gameObject.SetActive(false);
+        pillar1.localScale = Vector3.zero;
+        pillar2.localScale = Vector3.zero;
+        
+        SetText(-1);
+
+        pillar1.DOScale(Vector3.one, animTime).SetEase(Ease.OutBounce);
+        pillar2.DOScale(Vector3.one, animTime).SetEase(Ease.OutBounce);
+
+        await UniTask.Delay((int)(animTime * 1000));
+        rope.gameObject.SetActive(true);
+    }
+
+    private void Off()
+    {
+        SetText(-1);
+        animObject.SetActive(false);
+        
+        rope.gameObject.SetActive(false);
+        pillar1.localScale = Vector3.zero;
+        pillar2.localScale = Vector3.zero;
+    }
     
-    void StartLaunch()
+    public void StartLaunch()
     {
         ResetLaunch();
         
-        defaultPos = fromLaunchCoord.position;
-        defaultPos.y = toLaunch.transform.position.y;
-        counterPercent.gameObject.SetActive(true);
-        SetText(0);
+        On();
+
+        defaultPos = toLaunch.transform.position;
+        defaultPos.y = -1f;
 
         PlayerController.Launched = false;
     }
 
     void Launch()
     {
-        counterPercent.gameObject.SetActive(false);
-        
         // if (Vector3.Angle(dirStartCurrent3, Vector3.right) <
         //     Vector3.Angle(dirStartCurrent3, -Vector3.right))
         // {
@@ -134,7 +176,7 @@ public class LaunchController : MonoBehaviour
         
         PlayerController.Instance.Launch(LaunchPercent, angle);
         
-        ResetLaunch();
+        // Off();
         
         // ResetPos();
         // Debug.Log("laucnhed");
@@ -163,6 +205,7 @@ public class LaunchController : MonoBehaviour
 
     void SetText(float percent)
     {
+        counterPercent.gameObject.SetActive(percent >= 0);
         counterPercent.text = $"{Mathf.RoundToInt(percent * 100f)}%";
     }
 

@@ -18,6 +18,9 @@ public class MergeGrid : MonoBehaviour
     public static IReadOnlyCollection<MergeCell> Cells => Instance._cells;
 
     [HideInInspector] public MergeCell[] _cells;
+
+    public static float ChoiseOffset => Instance._choiseOffset;
+    [SerializeField] private float _choiseOffset;
     
     [Inject] private void Awake()
     {

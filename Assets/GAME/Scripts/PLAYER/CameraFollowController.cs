@@ -1,7 +1,9 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Cinemachine;
+using Zenject;
 
 [ExecuteInEditMode]
 public class CameraFollowController : MonoBehaviour
@@ -56,26 +58,33 @@ public class CameraFollowController : MonoBehaviour
     private Vector3 position => target.position - 
         transform.rotation * new Vector3(0,0,1) * distanceToTarget + new Vector3(0f, upSpace, 0f);
     
-    void Awake()
+    [Inject] void Awake()
     {
         Instance = this;
         GameManager.OnGameStart += Reset;
-    }
-
-    void Start()
-    {
+        
         Reset();
     }
+
+    private void OnDestroy()
+    {
+        GameManager.OnGameStart -= Reset;
+    }
+
+    // void Start()
+    // {
+    //     Reset();
+    // }
     
     void Update()
     {
         if (target)
         {
-            cam.transform.localPosition = Vector3.zero;
-            cam.transform.localEulerAngles = Vector3.zero;
-            cam.fieldOfView = 60;
+            // cam.transform.localPosition = Vector3.zero;
+            // cam.transform.localEulerAngles = Vector3.zero;
+            // cam.fieldOfView = 60;
             
-            transform.position = Vector3.Lerp(transform.position, position, speedMove * Time.deltaTime);
+            transform.position = Vector3.Slerp(transform.position, position, speedMove * Time.deltaTime);
         }
     }
 }

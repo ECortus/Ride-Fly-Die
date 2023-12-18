@@ -68,6 +68,23 @@ public abstract class Part : MonoBehaviour
             angles.y += 90f;
         }
         
+        if (OverMergeField && _dragedPart && _dragedPart == this && !GameManager.GameStarted)
+        {
+            switch (Type.Category)
+            {
+                case PartCategory.Cabin:
+                    break;
+                case PartCategory.Grid:
+                    break;
+                case PartCategory.Wheels:
+                    angles += new Vector3(0, 0, Cam.transform.eulerAngles.x);
+                    break;
+                default:
+                    angles -= new Vector3(Cam.transform.eulerAngles.x, 0, 0);
+                    break;
+            }
+        }
+        
         transform.localEulerAngles = angles;
     }
 
@@ -429,6 +446,11 @@ public abstract class Part : MonoBehaviour
     private Camera Cam => Camera.main;
     private Vector3 mousePos, worldPos;
 
+    private Quaternion targetRotation;
+
+    private float targetSize;
+    private bool OverMergeField => MouseOverMergeField.Is || MergeCell.SelectedCell || DeletePart.Selected || BuyPart.Selected;
+
     protected virtual void OnMouseDrag()
     {
         if (GameManager.GameStarted || _blockAll || BlockMove) return;
@@ -476,26 +498,38 @@ public abstract class Part : MonoBehaviour
                 SetMousePosition();
             }
 
-            if (!MergeCell.SelectedCell && !GridCell.SelectedCell && !DeletePart.Selected)
+            if (!MergeCell.SelectedCell && !DeletePart.Selected && !GridCell.SelectedCell)
             {
                 ChangeColor(false);
-                transform.localScale = Vector3.MoveTowards(transform.localScale, Vector3.one * 1.3f, 6f * Time.deltaTime);
+                targetSize = 1.3f;
             }
             else
             {
                 ChangeColor(true);
-                transform.localScale = Vector3.MoveTowards(transform.localScale, Vector3.one * defaultSize, 6f * Time.deltaTime);
+                targetSize = defaultSize;
             }
+            
+            targetSize *= OverMergeField ? 0.75f : 1f;
+            transform.localScale = Vector3.MoveTowards(transform.localScale, Vector3.one * targetSize, 6f * Time.deltaTime);
         }
     }
 
+    private Vector3 direction, offset;
+    private float offsetValue;
+    
     void SetMousePosition()
     {
         mousePos = Input.mousePosition;
         mousePos.z = Cam.transform.position.x;
             
         worldPos = Cam.ScreenToWorldPoint(mousePos);
-        transform.position = worldPos;
+
+        direction = (worldPos - Cam.transform.position).normalized;
+        offsetValue = OverMergeField ? MergeGrid.ChoiseOffset : 0;
+        offset = direction * offsetValue;
+        transform.position = worldPos - offset;
+        
+        // transform.position = worldPos;
                 
         SetOrientation(PartOrientation.Default);
     }

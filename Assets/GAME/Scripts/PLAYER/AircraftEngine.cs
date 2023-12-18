@@ -232,7 +232,7 @@ public class AircraftEngine : MonoBehaviour
         
         Vector3 dir = Body.transform.forward;
         dir.y = 0f;
-        Body.velocity += -dir * LaunchPower.Power * accelerationModificator * percentForce;
+        Body.velocity += -dir * LaunchPower.Power * (1f + accelerationModificator) * percentForce;
     }
     
     void Update()

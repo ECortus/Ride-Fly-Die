@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Obi;
@@ -6,44 +7,116 @@ using UnityEngine;
 public class RopeColBack : MonoBehaviour
 {
     private PlayerController player => PlayerController.Instance;
-    [SerializeField] private Transform toCol;
+    [SerializeField] private Transform toMove;
+    [SerializeField] private Vector3 offset;
+
+    [Space]
+    [SerializeField] private bool ByCol = false;
+    [SerializeField] private GameObject col;
+    
+    [Space] 
+    [SerializeField] private bool ByDot = false;
+    [SerializeField] private float dotSpace = 1.25f;
+    [SerializeField] private GameObject rightDot;
+    [SerializeField] private GameObject leftDot;
     
     [Space]
     [SerializeField] private ParticleSystem particle;
     [SerializeField] private float particleHeight = -2f;
+
+    private void Awake()
+    {
+        GameManager.OnGameStart += On;
+        Off();
+    }
+
+    void On()
+    {
+        ChangeObjects(1);
+        
+        toMove.gameObject.SetActive(true);
+        particle.gameObject.SetActive(true);
+    }
     
-    [Space]
-    [SerializeField] private LaunchController launch;
+    void Off()
+    {
+        toMove.gameObject.SetActive(false);
+        particle.gameObject.SetActive(false);
+        
+        ChangeObjects(-1);
+        toMove.localPosition = Vector3.zero;
+    }
+
+    void ChangeObjects(int index)
+    {
+        rightDot.SetActive(index > 0 && !ByCol && ByDot);
+        leftDot.SetActive(index > 0 && !ByCol && ByDot);
+            
+        col.SetActive(index > 0 && ByCol && !ByDot);
+    }
     
     void FixedUpdate()
     {
-        if (!PlayerController.Launched && Input.GetMouseButton(0))
+        if (PlayerController.Launched)
         {
-            toCol.gameObject.SetActive(true);
-            toCol.position = player.transform.position - CorrectPos();
-            toCol.rotation = LaunchController.Rotate;
+            Off();
+        }
+        else
+        {
+            toMove.rotation = LaunchController.Rotate;
+            
+            if (ByDot)
+            {
+                rightDot.transform.localPosition = new Vector3(-dotSpace, 0, 0);
+                leftDot.transform.localPosition = new Vector3(dotSpace, 0, 0);
+            }
+            
+            if (Input.GetMouseButton(0))
+            {
+                if (ByCol)
+                {
+                    col.SetActive(true);
+                }
+                
+                toMove.position = player.transform.position - CorrectPos() + offset;
+            }
+            else
+            {
+                if (ByCol)
+                {
+                    col.SetActive(false);
+                }
+            }
             
             particle.transform.position = new Vector3(
                 player.transform.position.x,
                 particleHeight,
                 player.transform.position.z);
         }
-        else
-        {
-            toCol.gameObject.SetActive(false);
-        }
     }
 
     Vector3 CorrectPos()
     {
         Vector3 pos = Vector3.zero;
+        float offsetZ;
         int index = PlayerGrid.Instance.MainIndex;
+
+        GridCell cell;
 
         for (int i = 0; i < 3; i++)
         {
-            if (PlayerGrid.Instance.GetByIndex(index - i).Part)
+            cell = PlayerGrid.Instance.GetByIndex(index - i);
+            
+            if (cell && cell.Part)
             {
-                pos.z = PlayerGrid.Instance.GetRequireLocalPosition(index - i).z;
+                offsetZ = PlayerGrid.Instance.GetRequireLocalPosition(index - i).z;
+                
+                offsetZ -=
+                    (cell.Part.Type.Category == PartCategory.Boost) ? 1f : 0f;
+                // offsetZ +=
+                //     (cell.Part.Type.Category == PartCategory.Wings) ? 2f : 0f;
+                
+                pos.z = offsetZ;
             }
         }
         

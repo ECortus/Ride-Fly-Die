@@ -125,4 +125,23 @@ public class BuyPart : MonoBehaviour
         availableObject.SetActive(state);
         disableObject.SetActive(!state);
     }
+    
+    public static bool Selected { get; private set; }
+
+    private void OnMouseOver()
+    {
+        if (Part.DragedPart)
+        {
+            Selected = true;
+        }
+        else
+        {
+            OnMouseExit();
+        }
+    }
+
+    private void OnMouseExit()
+    {
+        Selected = false;
+    }
 }

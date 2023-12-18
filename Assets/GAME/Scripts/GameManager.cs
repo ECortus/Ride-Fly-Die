@@ -40,7 +40,7 @@ public class GameManager : MonoBehaviour
         Instance = this;
         
         OnGameFinish += RecordMaxFlyLength;
-        if(!Tutorial.MainCompleted || !Tutorial.MergeCompleted) OnMergeGame += CheckTutorial;
+        // if(!Tutorial.MainCompleted || !Tutorial.MergeCompleted) OnMergeGame += CheckTutorial;
     }
 
     void Start()
@@ -62,6 +62,7 @@ public class GameManager : MonoBehaviour
     
     public async void MergeGame()
     {
+        LaunchController.Blocked = true;
         PlayerController.Instance.SpawnToPos(LaunchPos);
         
         GameStarted = false;
@@ -70,7 +71,7 @@ public class GameManager : MonoBehaviour
         await DarkEclipse.Play();
     }
     
-    public void StartGame()
+    public async void StartGame()
     {
         if (GameStarted) return;
         

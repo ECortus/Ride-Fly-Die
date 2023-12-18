@@ -14,6 +14,16 @@ public class PreGameSceneController : MonoBehaviour
     [SerializeField] private GameObject mergeUI;
     [SerializeField] private GameObject gameUI;
 
+    [Space] 
+    [SerializeField] private GameObject normalRoad;
+    [SerializeField] private GameObject mergeRoad;
+
+    void ChangeObjects(int index)
+    {
+        normalRoad.SetActive(index == 0 || index == 2);
+        mergeRoad.SetActive(index == 1);
+    }
+
     private void Awake()
     {
         GameManager.OnMergeGame += MoveToPreGame;
@@ -28,15 +38,19 @@ public class PreGameSceneController : MonoBehaviour
     public async void MoveToPreGame()
     {
         Part.SetBlock(true);
+        
         mergeUI.SetActive(false);
         gameUI.SetActive(false);
+        ChangeObjects(0);
         
         CameraFollowController.Instance.SetTarget(null);
         VirtualCameraController.Instance.ChangeVirtualCamera(0);
 
         await UniTask.Delay(100);
         await UniTask.WaitUntil(() => !cameraBrain.IsBlending);
+        
         preGameUI.SetActive(true);
+        // ChangeObjects(0);
     }
 
     public async void MoveToMerge()
@@ -52,18 +66,26 @@ public class PreGameSceneController : MonoBehaviour
         mergeUI.SetActive(true);
         
         Part.SetBlock(false);
+        ChangeObjects(1);
     }
     
-    public void MoveToFly()
+    private async void MoveToFly()
     {
         Part.SetBlock(true);
+        
         preGameUI.SetActive(false);
         mergeUI.SetActive(false);
+        ChangeObjects(2);
         
-        VirtualCameraController.Instance.ChangeVirtualCamera(-1);
-        // VirtualCameraController.Instance.ChangeVirtualCamera(2);
-        CameraFollowController.Instance.SetTarget(PlayerController.Follow);
+        // VirtualCameraController.Instance.ChangeVirtualCamera(-1);
+        // CameraFollowController.Instance.SetTarget(PlayerController.Follow);
+        VirtualCameraController.Instance.ChangeVirtualCamera(2);
+        
+        await UniTask.Delay(100);
+        await UniTask.WaitUntil(() => !cameraBrain.IsBlending);
         
         gameUI.SetActive(true);
+        LaunchController.Blocked = false;
+        // ChangeObjects(2);
     }
 }

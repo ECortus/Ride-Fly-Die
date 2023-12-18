@@ -13,55 +13,11 @@ MonoBehaviour:
   m_Name: Main Camera Blends
   m_EditorClassIdentifier: 
   m_CustomBlends:
-  - m_From: VirtualCam-2
-    m_To: VirtualCam-1
-    m_Blend:
-      m_Style: 1
-      m_Time: 0.75
-      m_CustomCurve:
-        serializedVersion: 2
-        m_Curve: []
-        m_PreInfinity: 0
-        m_PostInfinity: 0
-        m_RotationOrder: 0
-  - m_From: VirtualCam-1
-    m_To: VirtualCam-2
-    m_Blend:
-      m_Style: 1
-      m_Time: 0.75
-      m_CustomCurve:
-        serializedVersion: 2
-        m_Curve: []
-        m_PreInfinity: 0
-        m_PostInfinity: 0
-        m_RotationOrder: 0
   - m_From: VirtualCam-3
     m_To: VirtualCam-1
     m_Blend:
       m_Style: 0
       m_Time: 2
-      m_CustomCurve:
-        serializedVersion: 2
-        m_Curve: []
-        m_PreInfinity: 0
-        m_PostInfinity: 0
-        m_RotationOrder: 0
-  - m_From: VirtualCam-2
-    m_To: VirtualCam-3
-    m_Blend:
-      m_Style: 1
-      m_Time: 0.75
-      m_CustomCurve:
-        serializedVersion: 2
-        m_Curve: []
-        m_PreInfinity: 0
-        m_PostInfinity: 0
-        m_RotationOrder: 0
-  - m_From: VirtualCam-1
-    m_To: VirtualCam-3
-    m_Blend:
-      m_Style: 1
-      m_Time: 0.75
       m_CustomCurve:
         serializedVersion: 2
         m_Curve: []
