@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: Boost_Parameters
   m_EditorClassIdentifier: 
   defaultMotorForce: 1.1
-  multiple: 1.3
+  multiple: 0.2

@@ -47,6 +47,36 @@ public class PlayerGrid : MonoBehaviour
         
     }
 
+    public void ClearMergeParts()
+    {
+        Part part;
+        
+        foreach (var VARIABLE in _cells)
+        {
+            part = VARIABLE.Part;
+
+            if (part)
+            {
+                if (part.Type.Category != PartCategory.Cabin && part.Type.Category != PartCategory.Grid)
+                {
+                    MergeGrid.Instance.SpawnPart(VARIABLE.Part.Type.GetPart(VARIABLE.Part.Level));
+                    VARIABLE.Part._currentGridCell.UnRegistry();
+                    VARIABLE.Part.DestroyPart();
+                }
+            }
+            else
+            {
+                part = VARIABLE.AdditionalPart;
+                if (part && part.Type.Category != PartCategory.Cabin && part.Type.Category != PartCategory.Grid)
+                {
+                    MergeGrid.Instance.SpawnPart(VARIABLE.Part.Type.GetPart(VARIABLE.Part.Level));
+                    VARIABLE.Part._currentGridCell.UnRegistryAdditional();
+                    VARIABLE.Part.DestroyPart();
+                }
+            }
+        }
+    }
+
     public int HavePartOfType(PartType type, int lvl = -1)
     {
         GridCell cell;
@@ -244,15 +274,16 @@ public class PlayerGrid : MonoBehaviour
         return requireOrientations.Length > 0;
     }
     
-    public bool HaveNeighbors(Part part, GridCell cell, bool ignoreblock = false)
+    public bool HaveNeighbors(Part part, GridCell cell, PartCategory typeExceptation = PartCategory.Default, bool ignoreBlock = false)
     {
         bool value = false;
-        GridCell[] neighbors = GetNeighborCellsIndex(_cells.IndexOf(cell), ignoreblock);
+        GridCell[] neighbors = GetNeighborCellsIndex(_cells.IndexOf(cell), ignoreBlock);
         
         foreach (var VARIABLE in neighbors)
         {
             // Debug.Log(part.Type.Category + ", " + _cells.IndexOf(cell) + " - " + VARIABLE);
-            if (VARIABLE && VARIABLE.Part && (VARIABLE != part.GetGridCell() || VARIABLE.AdditionalPart == part) && VARIABLE.Part != part)
+            if (VARIABLE && VARIABLE.Part && (VARIABLE != part.GetGridCell() || VARIABLE.AdditionalPart == part) 
+                && VARIABLE.Part != part && VARIABLE.Part.Type.Category != typeExceptation)
             {
                 if(VARIABLE.Part.Type.Category != PartCategory.Grid && VARIABLE.Part.Type.Category != PartCategory.Cabin) continue;
                 

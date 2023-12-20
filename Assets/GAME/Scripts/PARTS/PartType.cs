@@ -14,5 +14,5 @@ public class PartType : ScriptableObject
 
 public enum PartCategory
 {
-    Cabin, Grid, Wings, Boost, Wheels
+    Default, Cabin, Grid, Wings, Boost, Wheels
 }

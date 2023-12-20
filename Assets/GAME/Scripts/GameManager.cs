@@ -19,7 +19,7 @@ public class GameManager : MonoBehaviour
     public static Action OnGameFinish { get; set; }
     void GameFinish() => OnGameFinish?.Invoke();
 
-    public float FlyLength
+    public static float FlyLength
     {
         get
         {
@@ -32,15 +32,18 @@ public class GameManager : MonoBehaviour
             return (from - to).magnitude;
         }
     }
-    
-    [field: SerializeField] public Vector3 LaunchPos { get; private set; }
+
+    [SerializeField] private PlayerController player;
+    public static Vector3 LaunchPos { get; private set; }
 
     private void Awake()
     {
         Instance = this;
         
+        LaunchPos = player.transform.position;
+        
         OnGameFinish += RecordMaxFlyLength;
-        // if(!Tutorial.MainCompleted || !Tutorial.MergeCompleted) OnMergeGame += CheckTutorial;
+        // if (!Tutorial.Completed) OnMergeGame += CheckTutorial;
     }
 
     void Start()
@@ -50,13 +53,13 @@ public class GameManager : MonoBehaviour
 
     void CheckTutorial()
     {
-        if (!Tutorial.MainCompleted)
+        if (!Tutorial.Completed)
         {
-            Tutorial.StartMainTutorial();
+            Tutorial.StartTutorial();
         }
-        else if (!Tutorial.MergeCompleted)
+        else
         {
-            Tutorial.StartMergeTutorial();
+            OnMergeGame -= CheckTutorial;
         }
     }
     
@@ -79,7 +82,7 @@ public class GameManager : MonoBehaviour
         GameStart();
     }
 
-    void RecordMaxFlyLength()
+    public static void RecordMaxFlyLength()
     {
         if (FlyLength >= Records.MaxDistance)
         {

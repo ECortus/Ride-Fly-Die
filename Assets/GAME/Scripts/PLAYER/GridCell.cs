@@ -51,16 +51,9 @@ public class GridCell : MonoBehaviour
 
         if (AdditionalPart)
         {
-            if (MergeGrid.FreeCount > 0)
-            {
-                MergeCell selectedCell = MergeGrid.Instance.GetFreeCell();
-                selectedCell.Registry(AdditionalPart);
-                AdditionalPart.SetCell(selectedCell);
-            }
-            else
-            {
-                AdditionalPart.DestroyPart();
-            }
+            MergeGrid.Instance.SpawnPart(Part.Type.GetPart(Part.Level));
+            AdditionalPart._currentGridCell.UnRegistryAdditional();
+            AdditionalPart.DestroyPart();
         }
         AdditionalPart = null;
         

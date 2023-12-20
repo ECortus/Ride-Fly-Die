@@ -79,6 +79,8 @@ public class MergeGrid : MonoBehaviour
     
     public void SpawnPart(Part partPref)
     {
+        if (FreeCount == 0) return;
+        
         MergeCell cell = GetFreeCell();
         SpawnPartToCell(partPref, cell);
     }

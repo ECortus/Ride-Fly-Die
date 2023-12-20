@@ -6,7 +6,9 @@ using UnityEngine;
 public class BoostParameters : ScriptableObject
 {
     [SerializeField] private float defaultMotorForce = 100f;
-    [SerializeField] private float multiple = 1.2f;
+    [Range(0f, 1f)]
+    [SerializeField] private float multiple = 0.2f;
 
-    public float GetMotorForce(int lvl) => defaultMotorForce * Mathf.Pow(multiple, lvl);
+    public float Multiplier(int lvl) => lvl * multiple;
+    public float GetMotorForce(int lvl) => defaultMotorForce * (1f + Multiplier(lvl));
 }

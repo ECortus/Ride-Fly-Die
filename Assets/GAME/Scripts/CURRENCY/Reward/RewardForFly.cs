@@ -11,6 +11,6 @@ public class RewardForFly : ScriptableObject
     [field: SerializeField] private float GoldPerMeter = 10f;
     [field: SerializeField] private float GemPerMeter = 10f;
 
-    public int GoldReward(float lenght) => (int)(GoldPerMeter * currencyUpg.GoldMultiple * lenght);
-    public int GemReward(float lenght) => (int)(GemPerMeter * currencyUpg.GemMultiple * lenght);
+    public int GoldReward(float lenght, int multiplier = 1) => (int)(GoldPerMeter * currencyUpg.GoldMultiple * lenght) * multiplier;
+    public int GemReward(float lenght, int multiplier = 1) => (int)(GemPerMeter * currencyUpg.GemMultiple * lenght) * multiplier;
 }

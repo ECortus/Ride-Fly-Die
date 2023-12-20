@@ -8,44 +8,53 @@ using UnityEngine.UI;
 
 public class Tutorial : MonoBehaviour
 {
-    private static Tutorial Instance;
+    private static Tutorial Instance { get; set; }
     
-    public static bool MainCompleted
+    public static bool Completed => IterationsCompleted >= -1;
+    
+    public static int IterationsCompleted
     {
-        get => PlayerPrefs.GetInt("MainTutorialComplete", 0) != 0;
+        get => PlayerPrefs.GetInt("IterationsCompleted", 0);
         set
         {
-            PlayerPrefs.SetInt("MainTutorialComplete", value ? 1 : 0);
+            PlayerPrefs.SetInt("IterationsCompleted", value);
             PlayerPrefs.Save();
         }
     }
     
-    public static bool MergeCompleted
+    public static void StartTutorial()
     {
-        get => PlayerPrefs.GetInt("MergeTutorialComplete", 0) != 0;
-        set
+        if (IterationsCompleted == 0)
         {
-            PlayerPrefs.SetInt("MergeTutorialComplete", value ? 1 : 0);
-            PlayerPrefs.Save();
+            Instance.FirstIteration();
+        }
+        else if (IterationsCompleted == 1 && PartUnlocked.Wheels)
+        {
+            Instance.SecondIteration();
+        }
+        else if (IterationsCompleted == 2 && PartUnlocked.Wings)
+        {
+            Instance.ThirdIteration();
+        }
+        else if (IterationsCompleted == 3 && PartUnlocked.Grids)
+        {
+            Instance.FourthIteration();
+        }
+        else if (Completed)
+        {
+            Instance.gameObject.SetActive(false);
+            Instance = null;
         }
     }
     
-    public static void StartMainTutorial()
-    {
-        if(!MainCompleted) Instance.MainInit();
-    }
-
-    public static void StartMergeTutorial()
-    {
-        if(!MergeCompleted) Instance.MergeInit();
-    }
-
+    [Space]
     [SerializeField] private Transform hand;
     [SerializeField] private float doTime = 0.75f;
 
     [Space] 
     [SerializeField] private CinemachineBrain brain;
     [SerializeField] private PartType wheels, fans, wings;
+    [SerializeField] private UpgradeObject launch, currency, level;
     
     [Space] 
     [SerializeField] private GameObject[] layers;
@@ -74,6 +83,8 @@ public class Tutorial : MonoBehaviour
     [SerializeField] private Transform mergePos;
     [SerializeField] private Transform playPos;
     [SerializeField] private Transform buyPos;
+    [SerializeField] private Transform launchPos, currencyPos, levelPos;
+    [SerializeField] private Transform grid1Pos, grid2Pos;
 
     [Space] 
     [SerializeField] private GameObject layersBG;
@@ -121,280 +132,357 @@ public class Tutorial : MonoBehaviour
         return pos;
     }
 
+    Part GetPartOnGrid(int index)
+    {
+        return PlayerGrid.Instance._cells[index].Part;
+    }
+
     void Awake()
     {
-        if (MainCompleted && MergeCompleted)
+        if (Completed)
         {
             gameObject.SetActive(false);
             return;
         }
-
+        
         Instance = this;
-
-        // if (!MainCompleted) MainInit();
-        // else if (!MergeCompleted) MergeInit();
     }
 
-    private bool MainCompleteConditionWheelFirst => MergeGrid.Instance.HavePartOfType(wheels) > 0;
-    private bool MainCompleteConditionWheelSecond => PlayerGrid.Instance.HavePartOfType(wheels) > 0;
-    private bool MainCompleteConditionFanFirst => MergeGrid.Instance.HavePartOfType(fans) > 0;
-    private bool MainCompleteConditionFanSecond => PlayerGrid.Instance.HavePartOfType(fans) > 0;
+    private bool MergeFieldHaveType(PartType type, int count, int lvl = 0) => MergeGrid.Instance.HavePartOfType(type, lvl) >= count;
+    private bool PlayerGridHaveType(PartType type, int count, int lvl = 0) => PlayerGrid.Instance.HavePartOfType(type, lvl) >= count;
     
-    private bool MergeCompleteConditionFirst => MergeGrid.Instance.HavePartOfType(wings, 1) > 0;
-    private bool MergeCompleteConditionSecond => PlayerGrid.Instance.HavePartOfType(wings, 1) > 0;
-    
-    private async void MainInit()
+    private async void FirstIteration()
     {
-        play1Button.interactable = false;
-        play2Button.interactable = false;
-        backButton.interactable = false;
-        buyButton.interactable = false;
+        MergeGrid.Instance.ClearAll();
+        Part.SetBlock(true);
+        
+        SetAllButtons(false);
 
         int index;
         Transform target;
 
-        hand.gameObject.SetActive(true);
-        
-        hand.position = mergePos.position;
-        hand.localScale = Vector3.one;
-        hand.DOScale(Vector3.one * 0.75f, doTime)
-            .SetLoops(-1, LoopType.Yoyo)
-            .SetEase(Ease.InOutSine);
-        
+        HandScale(mergePos.position);
         SetLayer(0);
-        
+
         await UniTask.WaitUntil(() => brain.IsBlending);
 
-        hand.DOKill();
-        hand.gameObject.SetActive(false);
-        
+        HandOff();
         SetLayer(-1);
-        
+
         await UniTask.Delay(100);
         await UniTask.WaitUntil(() => !brain.IsBlending);
 
-        if (!MainCompleteConditionWheelSecond)
+        if (!PlayerGridHaveType(fans, 1))
         {
-            BuyPart.SetPartToBuy(wheels);
-            hand.gameObject.SetActive(true);
-            buyButton.interactable = true;
-        
-            hand.position = buyPos.position;
-            hand.localScale = Vector3.one;
-            hand.DOScale(Vector3.one * 0.75f, doTime)
-                .SetLoops(-1, LoopType.Yoyo)
-                .SetEase(Ease.InOutSine);
-        
-            SetLayer(1);
-
-            if (!MainCompleteConditionWheelFirst)
+            if (!MergeFieldHaveType(fans, 1))
             {
+                BuyPart.SetPartToBuy(fans);
+                buyButton.interactable = true;
+
+                HandScale(buyPos.position);
+                SetLayer(1);
+                
                 Gold.Plus(Mathf.Clamp(BuyPart.Cost - Gold.Value, 0, 999));
-                await UniTask.WaitUntil(() => MainCompleteConditionWheelFirst);
+                await UniTask.WaitUntil(() => MergeFieldHaveType(fans, 1));
             }
-        
-            hand.DOKill();
-            hand.localScale = Vector3.one;
+
             buyButton.interactable = false;
 
-            index = GetIndexOfPartOnMerge(wheels);
-            target = cellsPoses[index];
-            SetCellLayer(index);
-        
-            hand.position = target.position;
-            hand.DOMove(detailPosWheel.position, doTime)
-                .SetLoops(-1, LoopType.Yoyo)
-                .SetEase(Ease.InOutSine);
-
-            await UniTask.WaitUntil(() => MainCompleteConditionWheelSecond);
-        }
-
-        if (!MainCompleteConditionFanSecond)
-        {
-            hand.DOKill();
-            BuyPart.SetPartToBuy(fans);
-            buyButton.interactable = true;
-        
-            hand.position = buyPos.position;
-            hand.localScale = Vector3.one;
-            hand.DOScale(Vector3.one * 0.75f, doTime)
-                .SetLoops(-1, LoopType.Yoyo)
-                .SetEase(Ease.InOutSine);
-        
-            SetLayer(1);
-
-            if (!MainCompleteConditionFanFirst)
-            {
-                Gold.Plus(Mathf.Clamp(BuyPart.Cost - Gold.Value, 0, 999));
-                await UniTask.WaitUntil(() => MainCompleteConditionFanFirst);
-            }
-        
-            hand.DOKill();
-            hand.localScale = Vector3.one;
-            buyButton.interactable = false;
-        
             index = GetIndexOfPartOnMerge(fans);
             target = cellsPoses[index];
+            
+            HandMove(target.position, detailPosFan.position);
             SetCellLayer(index);
-        
-            hand.position = target.position;
-            hand.DOMove(detailPosFan.position, doTime)
-                .SetLoops(-1, LoopType.Yoyo)
-                .SetEase(Ease.InOutSine);
+            
+            Part.SetBlock(false);
 
-            await UniTask.WaitUntil(() => MainCompleteConditionFanSecond);
+            await UniTask.WaitUntil(() => PlayerGridHaveType(fans, 1));
         }
         
-        hand.DOKill();
-        hand.gameObject.SetActive(true);
         BuyPart.NullPartToBuy();
-        
-        hand.position = playPos.position;
-        hand.localScale = Vector3.one;
-        hand.DOScale(Vector3.one * 0.75f, doTime)
-            .SetLoops(-1, LoopType.Yoyo)
-            .SetEase(Ease.InOutSine);
-        
-        SetLayer(2);
-        
+
+        HandScale(playPos.position);
+        SetLayer(5);
+
         play2Button.interactable = true;
+        
+        Part.SetBlock(true);
 
         await UniTask.WaitUntil(() => GameManager.GameStarted);
+        
+        Part.SetBlock(false);
 
-        hand.DOKill();
-        hand.gameObject.SetActive(false);
+        HandOff();
         SetLayer(-1);
-        
-        play1Button.interactable = true;
-        backButton.interactable = true;
-        buyButton.interactable = true;
-        
-        MainCompleted = true;
+
+        SetAllButtons(true);
+
+        IterationsCompleted = 1;
     }
     
-    private async void MergeInit()
+    private async void SecondIteration()
     {
-        play1Button.interactable = false;
-        play2Button.interactable = false;
-        backButton.interactable = false;
-        buyButton.interactable = false;
-        
-        int index;
-        Transform targetFirst, targetTwo;
-        
         MergeGrid.Instance.ClearAll();
+        Part.SetBlock(true);
         
-        hand.gameObject.SetActive(true);
-        
-        hand.position = mergePos.position;
-        hand.localScale = Vector3.one;
-        hand.DOScale(Vector3.one * 0.75f, doTime)
-            .SetLoops(-1, LoopType.Yoyo)
-            .SetEase(Ease.InOutSine);
-        
+        SetAllButtons(false);
+
+        int index;
+        Transform target;
+
+        if (launch.Level == 0)
+        {
+            Gem.Plus(Mathf.Clamp(launch.Cost - Gem.Value, 0, 999));
+            
+            HandScale(launchPos.position);
+            SetLayer(2);
+
+            await UniTask.WaitUntil(() => launch.Level > 0);
+        }
+        else if (currency.Level == 0)
+        {
+            Gem.Plus(Mathf.Clamp(currency.Cost - Gem.Value, 0, 999));
+            
+            HandScale(currencyPos.position);
+            SetLayer(3);
+            
+            await UniTask.WaitUntil(() => currency.Level > 0);
+        }
+        else if (level.Level == 0)
+        {
+            Gem.Plus(Mathf.Clamp(level.Cost - Gem.Value, 0, 999));
+            
+            HandScale(levelPos.position);
+            SetLayer(4);
+            
+            await UniTask.WaitUntil(() => level.Level > 0);
+        }
+
+        HandScale(mergePos.position);
         SetLayer(0);
-        
+
         await UniTask.WaitUntil(() => brain.IsBlending);
-        
-        hand.DOKill();
-        hand.gameObject.SetActive(false);
-        
+
+        HandOff();
         SetLayer(-1);
-        
+
         await UniTask.Delay(100);
         await UniTask.WaitUntil(() => !brain.IsBlending);
 
-        if (!MergeCompleteConditionSecond)
+        if (!PlayerGridHaveType(wheels, 1, 1))
         {
-            if (!MergeCompleteConditionFirst)
+            MergeGrid.Instance.SpawnPart(wheels.GetPart(0));
+            
+            if (!MergeFieldHaveType(wheels, 2))
             {
-                BuyPart.SetPartToBuy(wings);
-                hand.gameObject.SetActive(true);
+                BuyPart.SetPartToBuy(wheels);
                 buyButton.interactable = true;
-        
-                hand.position = buyPos.position;
-                hand.localScale = Vector3.one;
-                hand.DOScale(Vector3.one * 0.75f, doTime)
-                    .SetLoops(-1, LoopType.Yoyo)
-                    .SetEase(Ease.InOutSine);
-        
+
+                HandScale(buyPos.position);
                 SetLayer(1);
-
-                if (MergeGrid.Instance.HavePartOfType(wings) <= 0)
-                {
-                    Gold.Plus(Mathf.Clamp(BuyPart.Cost - Gold.Value, 0, 999));
-                    await UniTask.WaitUntil(() => MergeGrid.Instance.HavePartOfType(wings) > 0);
-                }
-
-                if (MergeGrid.Instance.HavePartOfType(wings) <= 1)
-                {
-                    Gold.Plus(Mathf.Clamp(BuyPart.Cost - Gold.Value, 0, 999));
-                    await UniTask.WaitUntil(() => MergeGrid.Instance.HavePartOfType(wings) > 1);
-                }
-        
-                hand.DOKill();
-                buyButton.interactable = false;
-        
-                index = GetIndexOfPartOnMerge(wings);
-                targetFirst = cellsPoses[index];
-                SetCellLayer(index);
-        
-                index = GetIndexOfPartOnMerge(wings, -1, index);
-                targetTwo = cellsPoses[index];
-                SetCellLayer(index);
-        
-                hand.position = targetFirst.position;
-                hand.DOMove(targetTwo.position, doTime)
-                    .SetLoops(-1, LoopType.Yoyo)
-                    .SetEase(Ease.InOutSine);
-        
-                await UniTask.WaitUntil(() => MergeCompleteConditionFirst);
+                
+                Gold.Plus(Mathf.Clamp(BuyPart.Cost - Gold.Value, 0, 999));
+                await UniTask.WaitUntil(() => MergeFieldHaveType(wheels, 1));
             }
-        
-            hand.DOKill();
-            hand.localScale = Vector3.one;
-        
-            SetCellLayer(-1);
-        
-            index = GetIndexOfPartOnMerge(wings, 1);
-            targetFirst = cellsPoses[index];
+            
+            Part.SetBlock(false);
+
+            if (!MergeFieldHaveType(wheels, 1, 1))
+            {
+                buyButton.interactable = false;
+
+                Transform trg1, trg2;
+                
+                index = GetIndexOfPartOnMerge(wheels, 1);
+                trg1 = cellsPoses[index];
+                SetCellLayer(index);
+
+                index = GetIndexOfPartOnMerge(wheels, 1, index);
+                trg2 = cellsPoses[index];
+                SetCellLayer(index);
+                
+                HandMove(trg1.position, trg2.position);
+                await UniTask.WaitUntil(() => MergeFieldHaveType(wheels, 1, 1));
+            }
+
+            index = GetIndexOfPartOnMerge(wheels, 1);
+            target = cellsPoses[index];
+            
+            HandMove(target.position, detailPosWheel.position);
             SetCellLayer(index);
-        
-            hand.position = targetFirst.position;
-            hand.DOMove(detailPosWings.position, doTime)
-                .SetLoops(-1, LoopType.Yoyo)
-                .SetEase(Ease.InOutSine);
-        
-            buyButton.interactable = false;
-        
-            await UniTask.WaitUntil(() => MergeCompleteConditionSecond);
+
+            await UniTask.WaitUntil(() => PlayerGridHaveType(wheels, 1, 1));
         }
         
+        BuyPart.NullPartToBuy();
+
+        HandScale(playPos.position);
+        SetLayer(5);
+
+        play2Button.interactable = true;
+        
+        Part.SetBlock(true);
+
+        await UniTask.WaitUntil(() => GameManager.GameStarted);
+        
+        Part.SetBlock(false);
+
+        HandOff();
+        SetLayer(-1);
+
+        SetAllButtons(true);
+
+        IterationsCompleted = 2;
+    }
+    
+    private async void ThirdIteration()
+    {
+        MergeGrid.Instance.ClearAll();
+        Part.SetBlock(true);
+        
+        SetAllButtons(false);
+
+        int index;
+        Transform target;
+
+        HandScale(mergePos.position);
+        SetLayer(0);
+
+        await UniTask.WaitUntil(() => brain.IsBlending);
+
+        HandOff();
+        SetLayer(-1);
+
+        await UniTask.Delay(100);
+        await UniTask.WaitUntil(() => !brain.IsBlending);
+
+        if (!PlayerGridHaveType(wings, 1))
+        {
+            if (!MergeFieldHaveType(wings, 1))
+            {
+                BuyPart.SetPartToBuy(wings);
+                buyButton.interactable = true;
+
+                HandScale(buyPos.position);
+                SetLayer(1);
+                
+                Gold.Plus(Mathf.Clamp(BuyPart.Cost - Gold.Value, 0, 999));
+                await UniTask.WaitUntil(() => MergeFieldHaveType(wings, 1));
+            }
+
+            buyButton.interactable = false;
+
+            index = GetIndexOfPartOnMerge(wings);
+            target = cellsPoses[index];
+            
+            HandMove(target.position, detailPosFan.position);
+            SetCellLayer(index);
+            
+            Part.SetBlock(false);
+
+            await UniTask.WaitUntil(() => PlayerGridHaveType(wings, 1));
+        }
+        
+        BuyPart.NullPartToBuy();
+
+        HandScale(playPos.position);
+        SetLayer(5);
+
+        play2Button.interactable = true;
+        
+        Part.SetBlock(true);
+
+        await UniTask.WaitUntil(() => GameManager.GameStarted);
+        
+        Part.SetBlock(false);
+
+        HandOff();
+        SetLayer(-1);
+
+        SetAllButtons(true);
+
+        IterationsCompleted = 3;
+    }
+    
+    private async void FourthIteration()
+    {
+        PlayerGrid.Instance.ClearMergeParts();
+        Part.SetBlock(true);
+        
+        SetAllButtons(false);
+
+        int index;
+        Transform target;
+
+        HandScale(mergePos.position);
+        SetLayer(0);
+
+        await UniTask.WaitUntil(() => brain.IsBlending);
+
+        HandOff();
+        SetLayer(-1);
+
+        await UniTask.Delay(100);
+        await UniTask.WaitUntil(() => !brain.IsBlending);
+
+        index = PlayerGrid.Instance.MainIndex;
+        int index1 = index + 1;
+        int index2 = index - 1;
+
+        if (GetPartOnGrid(index1))
+        {
+            HandMove(grid1Pos.position, grid2Pos.position);
+            await UniTask.WaitUntil(() => GetPartOnGrid(index2));
+        }
+        else if (GetPartOnGrid(index2))
+        {
+            HandMove(grid2Pos.position, grid1Pos.position);
+            await UniTask.WaitUntil(() => GetPartOnGrid(index1));
+        }
+
+        HandOff();
+        SetLayer(-1);
+
+        SetAllButtons(true);
+
+        IterationsCompleted = 4;
+    }
+
+    void SetAllButtons(bool state)
+    {
+        play1Button.interactable = state;
+        play2Button.interactable = state;
+        backButton.interactable = state;
+        buyButton.interactable = state;
+    }
+
+    void HandMove(Vector3 first, Vector3 second)
+    {
         hand.DOKill();
         hand.gameObject.SetActive(true);
-        BuyPart.NullPartToBuy();
         
-        hand.position = playPos.position;
+        hand.position = first;
+        hand.localScale = Vector3.one;
+        hand.DOMove(second, doTime)
+            .SetLoops(-1, LoopType.Yoyo)
+            .SetEase(Ease.InOutSine);
+    }
+
+    void HandScale(Vector3 pos)
+    {
+        hand.DOKill();
+        hand.gameObject.SetActive(true);
+        
+        hand.position = pos;
         hand.localScale = Vector3.one;
         hand.DOScale(Vector3.one * 0.75f, doTime)
             .SetLoops(-1, LoopType.Yoyo)
             .SetEase(Ease.InOutSine);
-        
-        SetLayer(2);
-        
-        play2Button.interactable = true;
-        
-        await UniTask.WaitUntil(() => GameManager.GameStarted);
-        
+    }
+
+    void HandOff()
+    {
         hand.DOKill();
         hand.gameObject.SetActive(false);
-        SetLayer(-1);
-        
-        play1Button.interactable = true;
-        backButton.interactable = true;
-        buyButton.interactable = true;
-        
-        gameObject.SetActive(false);
-        MergeCompleted = true;
     }
 }

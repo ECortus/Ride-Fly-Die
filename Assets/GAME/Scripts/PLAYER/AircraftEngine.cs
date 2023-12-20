@@ -14,7 +14,6 @@ public class AircraftEngine : MonoBehaviour
 {
     [field: SerializeField] public Rigidbody Body { get; private set; }
     [field: SerializeField] public SphereCollider Sphere { get; private set; }
-    [SerializeField] private LaunchPower LaunchPower;
     
     private static float GroundCheckDistanceDelta = 0.1f;
     private static float GroundCheckSkinWidthDelta = 0.05f;
@@ -224,7 +223,7 @@ public class AircraftEngine : MonoBehaviour
         crossUp = transform.up;
     }
 
-    public void AccelerateBody(Vector3 direction, float percentForce = 1)
+    public void AccelerateBody(Vector3 direction, float speed, float percentForce = 1)
     {
         // Body.AddForce(direction * LaunchPower.Power * accelerationModificator * percentForce, ForceMode.Acceleration);
         // Debug.Log(direction * LaunchPower.Power * accelerationModificator * percentForce);
@@ -232,7 +231,7 @@ public class AircraftEngine : MonoBehaviour
         
         Vector3 dir = Body.transform.forward;
         dir.y = 0f;
-        Body.velocity += -dir * LaunchPower.Power * (1f + accelerationModificator) * percentForce;
+        Body.velocity += -dir * speed * (1f + accelerationModificator) * percentForce;
     }
     
     void Update()
@@ -397,6 +396,7 @@ public class AircraftEngine : MonoBehaviour
                 0f,
                 -Body.transform.TransformDirection(boostDirection.normalized).z)
             : boostDirection.normalized;
+        
         Vector3 accelerationMod = accelerationDirection.normalized * accelerationModificator;
         
         if (onGround)

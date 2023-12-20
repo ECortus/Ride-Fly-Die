@@ -11,12 +11,17 @@ public class WinMenu : MonoBehaviour
     [SerializeField] private GameObject menuObject;
     [SerializeField] private Image menuBg;
     [SerializeField] private Transform menuTitle;
-    [SerializeField] private TextMeshProUGUI goldText, gemText;
-    [SerializeField] private Transform restartButton;
+
+    [Space] 
+    [SerializeField] private TextMeshProUGUI goldText;
+    [SerializeField] private TextMeshProUGUI gemText, flyText;
 
     [Space]
     [SerializeField] private RewardForFly rewards;
-    private float flyLength => GameManager.Instance.FlyLength;
+    [SerializeField] private RewardAfterFly getRewardUI;
+    [SerializeField] private PartUnlockController partUnlock;
+    
+    private float flyLength => GameManager.FlyLength;
     private int goldReward, gemReward;
 
     private float alpha;
@@ -31,31 +36,45 @@ public class WinMenu : MonoBehaviour
     
     private async void On()
     {
-        goldReward = rewards.GoldReward(flyLength);
-        gemReward = rewards.GemReward(flyLength);
+        int multiplier = PlayerController.Multiplier;
+        
+        goldReward = rewards.GoldReward(flyLength, multiplier);
+        gemReward = rewards.GemReward(flyLength, multiplier);
         
         HideMenu();
         menuObject.SetActive(true);
 
         goldText.text = $"{goldReward.ToString()}";
         gemText.text = $"{gemReward.ToString()}";
+        flyText.text = $"{Mathf.RoundToInt(flyLength).ToString()}m";
 
         await menuBg.DOColor(new Color(menuBg.color.r, menuBg.color.g, menuBg.color.b, alpha), 0.5f).AsyncWaitForCompletion();
-        await menuTitle.DOScale(Vector3.one, 0.5f).AsyncWaitForCompletion();
+        await menuTitle.DOScale(Vector3.one, 0.25f).AsyncWaitForCompletion();
         
-        await goldText.transform.DOScale(Vector3.one, 0.5f).AsyncWaitForCompletion();
-        await gemText.transform.DOScale(Vector3.one, 0.5f).AsyncWaitForCompletion();
+        partUnlock.Refresh();
+        await partUnlock.transform.DOScale(Vector3.one, 0.3f).AsyncWaitForCompletion();
+        
+        await flyText.transform.DOScale(Vector3.one, 0.35f).AsyncWaitForCompletion();
+        await goldText.transform.DOScale(Vector3.one, 0.35f).AsyncWaitForCompletion();
+        await gemText.transform.DOScale(Vector3.one, 0.35f).AsyncWaitForCompletion();
 
-        restartButton.transform.DOScale(Vector3.one, 0.5f);
+        getRewardUI.On();
+        getRewardUI.transform.DOScale(Vector3.one, 0.35f);
+
+        Reward();
     }
 
     void HideMenu()
     {
         menuBg.color = new Color(menuBg.color.r, menuBg.color.g, menuBg.color.b, 0f);
         menuTitle.localScale = Vector3.zero;
+        
+        flyText.transform.localScale = Vector3.zero;
         goldText.transform.localScale = Vector3.zero;
         gemText.transform.localScale = Vector3.zero;
-        restartButton.localScale = Vector3.zero;
+        
+        getRewardUI.transform.localScale = Vector3.zero;
+        partUnlock.transform.localScale = Vector3.zero;
     }
 
     void Reward()
@@ -63,13 +82,27 @@ public class WinMenu : MonoBehaviour
         Gold.Plus(goldReward);
         Gem.Plus(gemReward);
     }
-
-    public async void Off()
+    
+    public void OffWithReward(int multiple)
     {
-        Reward();
+        for (int i = 0; i < multiple - 1; i++)
+        {
+            Reward();
+        }
+        
+        Off();
+    }
+    
+    public void OffWithoutReward()
+    {
+        Off();
+    }
 
+    private async void Off()
+    {
         goldReward = 0;
         gemReward = 0;
+        getRewardUI.Off();
         
         await DarkEclipse.PlayReverse();
         menuObject.SetActive(false);
