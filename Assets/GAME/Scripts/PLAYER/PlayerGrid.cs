@@ -64,10 +64,10 @@ public class PlayerGrid : MonoBehaviour
                     VARIABLE.Part.DestroyPart();
                 }
             }
-            else
+            else if (VARIABLE.AdditionalPart)
             {
                 part = VARIABLE.AdditionalPart;
-                if (part && part.Type.Category != PartCategory.Cabin && part.Type.Category != PartCategory.Grid)
+                if (part.Type.Category != PartCategory.Cabin && part.Type.Category != PartCategory.Grid)
                 {
                     MergeGrid.Instance.SpawnPart(VARIABLE.Part.Type.GetPart(VARIABLE.Part.Level));
                     VARIABLE.Part._currentGridCell.UnRegistryAdditional();
@@ -175,33 +175,40 @@ public class PlayerGrid : MonoBehaviour
 
     void UploadGrids()
     {
+        ClearMergeParts();
         GridsUploads.UploadStat stat = Uploads.CurrentStat;
 
         int index;
         GridCell cell;
         Part part;
         
-        foreach (var VARIABLE in stat.Parts)
+        for(int i = 0; i < stat.Parts.Length; i++)
         {
-            index = MainIndex + VARIABLE.IndexOffset.x + VARIABLE.IndexOffset.y * 5;
-            cell = _cells[index];
-
-            part = cell.Part;
-            if (part)
+            if (stat.Parts[i].Type.Category == PartCategory.Cabin)
             {
-                if (part.Type.Category != PartCategory.Cabin && part.Type.Category != PartCategory.Grid)
+                if (HavePartOfType(stat.Parts[i].Type) > 0)
                 {
-                    Debug.Log("changed to merge");
-                    if (MergeGrid.FreeCount > 0)
-                    {
-                        MergeGrid.Instance.SpawnPart(part.Type.GetPart(part.Level));
-                    }
+                    break;
                 }
-                
-                part.DestroyPart();
+            }
+            else if (stat.Parts[i].Type.Category == PartCategory.Grid)
+            {
+                if (HavePartOfType(stat.Parts[i].Type) >= stat.Parts.Length - 1 || !PartUnlocked.Grids)
+                {
+                    break;
+                }
             }
             
-            SpawnPartToCell(VARIABLE.Type.GetPart(stat.LevelsOf), cell);
+            index = MainIndex + stat.Parts[i].IndexOffset.x + stat.Parts[i].IndexOffset.y * 5;
+            cell = _cells[index];
+
+            if (cell.Part && cell.Part.Type.Category != stat.Parts[i].Type.Category)
+            {
+                cell.UnRegistry();
+                cell.Part.DestroyPart();
+            }
+            
+            SpawnPartToCell(stat.Parts[i].Type.GetPart(stat.LevelsOf), cell);
         }
     }
 

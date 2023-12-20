@@ -78,7 +78,7 @@ public class RopeColBack : MonoBehaviour
                     col.SetActive(true);
                 }
                 
-                toMove.position = player.transform.position - CorrectPos() + offset;
+                toMove.position = player.transform.position - LaunchController.CorrectPos() + offset;
             }
             else
             {
@@ -93,33 +93,5 @@ public class RopeColBack : MonoBehaviour
                 particleHeight,
                 player.transform.position.z);
         }
-    }
-
-    Vector3 CorrectPos()
-    {
-        Vector3 pos = Vector3.zero;
-        float offsetZ;
-        int index = PlayerGrid.Instance.MainIndex;
-
-        GridCell cell;
-
-        for (int i = 0; i < 3; i++)
-        {
-            cell = PlayerGrid.Instance.GetByIndex(index - i);
-            
-            if (cell && cell.Part)
-            {
-                offsetZ = PlayerGrid.Instance.GetRequireLocalPosition(index - i).z;
-                
-                offsetZ -=
-                    (cell.Part.Type.Category == PartCategory.Boost) ? 1f : 0f;
-                // offsetZ +=
-                //     (cell.Part.Type.Category == PartCategory.Wings) ? 2f : 0f;
-                
-                pos.z = offsetZ;
-            }
-        }
-        
-        return pos;
     }
 }

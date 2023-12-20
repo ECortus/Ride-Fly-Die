@@ -153,7 +153,9 @@ public class Tutorial : MonoBehaviour
     
     private async void FirstIteration()
     {
+        PlayerGrid.Instance.ClearMergeParts();
         MergeGrid.Instance.ClearAll();
+        
         Part.SetBlock(true);
         
         SetAllButtons(false);

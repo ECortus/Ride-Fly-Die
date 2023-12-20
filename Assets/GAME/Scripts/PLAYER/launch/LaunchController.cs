@@ -30,12 +30,16 @@ public class LaunchController : MonoBehaviour
     
     [Space]
     [SerializeField] private TextMeshProUGUI counterPercent;
+
+    private Vector3 DefaultLaunchZonePosition { get; set; }
     
     [Inject] private void Awake()
     {
         GameManager.OnGameStart += StartLaunch;
         GameManager.OnMergeGame += Off;
         Instance = this;
+
+        DefaultLaunchZonePosition = transform.position;
         
         Off();
     }
@@ -129,6 +133,7 @@ public class LaunchController : MonoBehaviour
 
     private async void On()
     {
+        transform.position = DefaultLaunchZonePosition - CorrectPos();
         animObject.SetActive(true);
 
         rope.gameObject.SetActive(false);
@@ -218,6 +223,34 @@ public class LaunchController : MonoBehaviour
         angle = 0;
         currentPos = Vector3.zero;
         distanceStartCurrent = 0;
+    }
+    
+    public static Vector3 CorrectPos()
+    {
+        Vector3 pos = Vector3.zero;
+        float offsetZ;
+        int index = PlayerGrid.Instance.MainIndex;
+
+        GridCell cell;
+
+        for (int i = 0; i < 3; i++)
+        {
+            cell = PlayerGrid.Instance.GetByIndex(index - i);
+            
+            if (cell && cell.Part)
+            {
+                offsetZ = PlayerGrid.Instance.GetRequireLocalPosition(index - i).z;
+                
+                offsetZ -=
+                    (cell.Part.Type.Category == PartCategory.Boost) ? 1f : 0f;
+                // offsetZ +=
+                //     (cell.Part.Type.Category == PartCategory.Wings) ? 2f : 0f;
+                
+                pos.z = offsetZ;
+            }
+        }
+        
+        return pos;
     }
     
     private Vector3 DirectionFromAngle(float eulerY, float angleInDegrees)
