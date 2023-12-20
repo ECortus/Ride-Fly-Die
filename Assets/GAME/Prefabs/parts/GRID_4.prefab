@@ -425,18 +425,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b2162c525325177498f131665c0dd537, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  <Type>k__BackingField: {fileID: 11400000, guid: c4bac62e3594fee478a0dd0eca05ebbf,
-    type: 2}
+  <Type>k__BackingField: {fileID: 11400000, guid: c4bac62e3594fee478a0dd0eca05ebbf, type: 2}
   <Level>k__BackingField: 3
   <Mass>k__BackingField: 4
   <Sprite>k__BackingField: {fileID: 0}
   <BlockMerge>k__BackingField: 1
-  <BlockMove>k__BackingField: 1
+  <BlockMove>k__BackingField: 0
   <Orientations>k__BackingField:
     Data:
     - FixedPosition: {x: 0, y: 0, z: 0}
       RequireAngles: {x: 0, y: 180, z: 0}
       Type: 0
+      ApplyMirror: 0
+    - FixedPosition: {x: 0, y: 0, z: 0}
+      RequireAngles: {x: 0, y: 180, z: 0}
+      Type: 3
+      ApplyMirror: 0
+    - FixedPosition: {x: 0, y: 0, z: 0}
+      RequireAngles: {x: 0, y: 180, z: 0}
+      Type: 4
       ApplyMirror: 0
     Block:
       Top: 0

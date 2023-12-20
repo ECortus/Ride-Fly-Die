@@ -6,8 +6,9 @@ using TMPro;
 public class DistanceUI : MonoBehaviour
 {
     [SerializeField] private TextMeshProUGUI text;
+    
     private void FixedUpdate()
     {
-        text.text = $"{Mathf.RoundToInt(GameManager.Instance.FlyLength)}m";
+        text.text = $"{Mathf.RoundToInt(GameManager.FlyLength)}m";
     }
 }

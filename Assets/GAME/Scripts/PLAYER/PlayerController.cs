@@ -8,7 +8,9 @@ public class PlayerController : MonoBehaviour
     public static PlayerController Instance { get; private set; }
 
     [SerializeField] private AircraftEngine engine;
-    [SerializeField] private Transform partsParent;
+    [SerializeField] private LaunchPower LaunchPower;
+    [Space] 
+    [SerializeField] private GameObject countersUI;
     
     public static Action OnRepair { get; set; }
     public void Repair() => OnRepair?.Invoke();
@@ -17,6 +19,8 @@ public class PlayerController : MonoBehaviour
     public void Crash() => OnCrash?.Invoke();
     
     public static bool Launched { get; set; }
+    public static int Multiplier { get; private set; }
+    public static void SetMultiplier(int mult) => Multiplier = mult;
     
     public static Transform Follow { get; private set; }
 
@@ -56,6 +60,42 @@ public class PlayerController : MonoBehaviour
         GameManager.OnMergeGame += Repair;
 
         GameManager.OnGameFinish += Crash;
+        
+        countersUI.SetActive(false);
+    }
+
+    public void AccelerateForward(float speed)
+    {
+        engine.AccelerateBody(Forward, speed);
+    }
+    
+    public void AccelerateForwardForTime(float speed, float time)
+    {
+        _accelerationCoroutine ??= StartCoroutine(AccelerateForTime(speed, time));
+    }
+
+    void StopAccelerateForwardForTime()
+    {
+        if (_accelerationCoroutine != null)
+        {
+            StopCoroutine(_accelerationCoroutine);
+            _accelerationCoroutine = null;
+        }
+    }
+
+    private Coroutine _accelerationCoroutine;
+    IEnumerator AccelerateForTime(float speed, float limit)
+    {
+        float time = limit;
+
+        while (time > 0)
+        {
+            engine.AccelerateBody(Forward, speed);
+            time -= Time.fixedDeltaTime;
+            yield return null;
+        }
+
+        _accelerationCoroutine = null;
     }
 
     public void Launch(float percent = 1f, float angle = 0f)
@@ -69,7 +109,9 @@ public class PlayerController : MonoBehaviour
         Vector3 direction = DirectionFromAngle(180f, angle);
         // Vector3 direction = Forward;
         direction.y = 0;
-        engine.AccelerateBody(-direction, percent);
+        engine.AccelerateBody(-direction, LaunchPower.Power, percent);
+        
+        countersUI.SetActive(true);
     }
 
     private Vector3 startMousePosition, currentMousePosition;
@@ -175,6 +217,7 @@ public class PlayerController : MonoBehaviour
     
     void OnGameStart()
     {
+        countersUI.SetActive(false);
         CorrectSphereColliderCenter();
         
         Body.isKinematic = false;
@@ -191,10 +234,14 @@ public class PlayerController : MonoBehaviour
         // Body.angularVelocity = Vector3.zero;
         
         Launched = false;
+        
+        Multiplier = 1;
     }
     
     void PlayerRepair()
     {
+        StopAccelerateForwardForTime();
+        
         Body.isKinematic = true;
         engine.enabled = false;
         
@@ -203,6 +250,8 @@ public class PlayerController : MonoBehaviour
 
     void PlayerCrash()
     {
+        StopAccelerateForwardForTime();
+        
         Body.isKinematic = true;
         engine.enabled = false;
 

@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: Wheels_Parameters
   m_EditorClassIdentifier: 
   defaultAccelerationModifier: 0.1
-  multiple: 1.1
+  multiple: 0.2

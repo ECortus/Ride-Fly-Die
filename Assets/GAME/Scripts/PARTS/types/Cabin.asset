@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 85c9a74a9a24719469cb44178229667c, type: 3}
   m_Name: Cabin
   m_EditorClassIdentifier: 
+  <Category>k__BackingField: 1
   <PartLevels>k__BackingField:
   - {fileID: 6099459607565446372, guid: 33e2f18356753d745be75e847aa6eee9, type: 3}
   - {fileID: 8133345589267923330, guid: d8afd30117f83ca47aa100b4d59a973c, type: 3}

@@ -7,7 +7,9 @@ public class WheelsParameters : ScriptableObject
 {
     [Range(0f, 1f)]
     [SerializeField] private float defaultAccelerationModifier = 0.1f;
-    [SerializeField] private float multiple = 1.2f;
+    [Range(0f, 1f)]
+    [SerializeField] private float multiple = 0.2f;
 
-    public float GetAccelerationModifier(int lvl) => defaultAccelerationModifier * Mathf.Pow(multiple, lvl);
+    public float Multiplier(int lvl) => lvl * multiple;
+    public float GetAccelerationModifier(int lvl) => defaultAccelerationModifier * (1f + Multiplier(lvl));
 }

@@ -15,6 +15,7 @@ public abstract class Part : MonoBehaviour
     [field: SerializeField] public float Mass { get; private set; }
     [field: SerializeField] public Sprite Sprite { get; private set; }
     
+    [field: SerializeField] public bool PreShowOnPlayer { get; private set; }
     [field: SerializeField] public bool BlockMerge { get; private set; }
     [field: SerializeField] public bool BlockMove { get; private set; }
 
@@ -118,8 +119,8 @@ public abstract class Part : MonoBehaviour
 
     private readonly float defaultSize = 1f;
 
-    [SerializeField] MergeCell _currentMergeCell;
-    [SerializeField] GridCell _currentGridCell;
+    public MergeCell _currentMergeCell { get; set; }
+    public GridCell _currentGridCell { get; set; }
     public bool _placedOnGrid { get; set; }
     
     public GridCell GetGridCell() => _currentGridCell;
@@ -430,6 +431,8 @@ public abstract class Part : MonoBehaviour
     {
         if (GameManager.GameStarted || _blockAll || BlockMove) return;
         
+        if (Type.Category == PartCategory.Grid && PlayerGrid.Instance.HaveNeighbors(this, _currentGridCell, PartCategory.Cabin)) return;
+        
         if (_dragedPart == null)
         {
             SetDragedPart(this);
@@ -466,27 +469,36 @@ public abstract class Part : MonoBehaviour
             
             if (selectedGrid)
             {
-                if (selectedGrid.Part && !selectedGrid.Part.Orientations.Block.Front 
-                        && !selectedGrid.AdditionalPart
-                        && Orientations.HaveOrientation(PartOrientation.Front))
+                if (PreShowOnPlayer)
                 {
-                    SetOrientation(PartOrientation.Front);
-                    PlayerGrid.Instance.UpdatePartParsOnGridOnlyPos(this, selectedGrid);
+                    if (selectedGrid.Part && !selectedGrid.Part.Orientations.Block.Front 
+                                          && !selectedGrid.AdditionalPart
+                                          && Orientations.HaveOrientation(PartOrientation.Front))
+                    {
+                        SetOrientation(PartOrientation.Front);
+                        PlayerGrid.Instance.UpdatePartParsOnGridOnlyPos(this, selectedGrid);
                     
-                    // Debug.Log("first");
-                }
-                else if ((!selectedGrid.Part || selectedGrid.Part == this) && 
-                        (!selectedGrid.AdditionalPart || selectedGrid.AdditionalPart == this) &&
-                        (PlayerGrid.Instance.HaveNeighbors(this, selectedGrid) || _currentGridCell == selectedGrid) && 
-                        PlayerGrid.Instance.HaveOrientation(Orientations))
-                {
-                    // Debug.Log($"second, {PlayerGrid.Instance._cells.IndexOf(selectedGrid)}");
-                    PlayerGrid.Instance.UpdatePartParsOnGrid(this);
+                        // Debug.Log("first");
+                    }
+                    else if ((!selectedGrid.Part || selectedGrid.Part == this) && 
+                             (!selectedGrid.AdditionalPart || selectedGrid.AdditionalPart == this) &&
+                             (PlayerGrid.Instance.HaveNeighbors(this, selectedGrid) || _currentGridCell == selectedGrid) && 
+                             PlayerGrid.Instance.HaveOrientation(Orientations))
+                    {
+                        // Debug.Log($"second, {PlayerGrid.Instance._cells.IndexOf(selectedGrid)}");
+                        PlayerGrid.Instance.UpdatePartParsOnGrid(this);
+                    }
+                    else
+                    {
+                        // Debug.Log("third");
+                    
+                        transform.SetParent(null);
+                        SetMousePosition();
+                        SwitchMirror(false);
+                    }
                 }
                 else
                 {
-                    // Debug.Log("third");
-                    
                     transform.SetParent(null);
                     SetMousePosition();
                     SwitchMirror(false);
@@ -611,6 +623,9 @@ public abstract class Part : MonoBehaviour
 
                                 mergePart.DestroyPart();
                                 DestroyPart();
+                                
+                                GetPartUpgrade.ShowUpgrade(Type, Level + 1);
+                                
                                 return;
                             }
 

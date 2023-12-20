@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: Wings_Parameters
   m_EditorClassIdentifier: 
   defaultFlyModifier: 0.4
-  multiple: 1.2
+  multiple: 0.2

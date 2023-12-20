@@ -16,6 +16,7 @@ public class GridsUploads : ScriptableObject
 
         [Space] 
         public float RequireDistance;
+        public Sprite Sprite;
     }
 
     [Serializable]
@@ -25,7 +26,7 @@ public class GridsUploads : ScriptableObject
         public Vector2Int IndexOffset;
     }
 
-    [SerializeField] private UploadStat[] Stats;
+    public UploadStat[] Stats;
 
     public UploadStat CurrentStat
     {
