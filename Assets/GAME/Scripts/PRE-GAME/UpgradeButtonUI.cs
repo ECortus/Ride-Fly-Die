@@ -49,7 +49,7 @@ public class UpgradeButtonUI : MonoBehaviour
             return; 
         }
         
-        if (currentCost >= Gem.Value)
+        if (currentCost > Gem.Value)
         {
             ChangeObject(false);
         }

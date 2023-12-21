@@ -55,23 +55,20 @@ public class PlayerGrid : MonoBehaviour
         {
             part = VARIABLE.Part;
 
-            if (part)
+            if (part && part.Type.Category != PartCategory.Cabin && part.Type.Category != PartCategory.Grid)
             {
-                if (part.Type.Category != PartCategory.Cabin && part.Type.Category != PartCategory.Grid)
-                {
-                    MergeGrid.Instance.SpawnPart(VARIABLE.Part.Type.GetPart(VARIABLE.Part.Level));
-                    VARIABLE.Part._currentGridCell.UnRegistry();
-                    VARIABLE.Part.DestroyPart();
-                }
+                MergeGrid.Instance.SpawnPart(part.Type.GetPart(part.Level));
+                part._currentGridCell.UnRegistry();
+                part.DestroyPart();
             }
             else if (VARIABLE.AdditionalPart)
             {
                 part = VARIABLE.AdditionalPart;
                 if (part.Type.Category != PartCategory.Cabin && part.Type.Category != PartCategory.Grid)
                 {
-                    MergeGrid.Instance.SpawnPart(VARIABLE.Part.Type.GetPart(VARIABLE.Part.Level));
-                    VARIABLE.Part._currentGridCell.UnRegistryAdditional();
-                    VARIABLE.Part.DestroyPart();
+                    MergeGrid.Instance.SpawnPart(part.Type.GetPart(part.Level));
+                    part._currentGridCell.UnRegistryAdditional();
+                    part.DestroyPart();
                 }
             }
         }
@@ -175,7 +172,6 @@ public class PlayerGrid : MonoBehaviour
 
     void UploadGrids()
     {
-        ClearMergeParts();
         GridsUploads.UploadStat stat = Uploads.CurrentStat;
 
         int index;
@@ -188,7 +184,7 @@ public class PlayerGrid : MonoBehaviour
             {
                 if (HavePartOfType(stat.Parts[i].Type) > 0)
                 {
-                    break;
+                    continue;
                 }
             }
             else if (stat.Parts[i].Type.Category == PartCategory.Grid)
@@ -197,15 +193,18 @@ public class PlayerGrid : MonoBehaviour
                 {
                     break;
                 }
+                
+                ClearMergeParts();
             }
             
             index = MainIndex + stat.Parts[i].IndexOffset.x + stat.Parts[i].IndexOffset.y * 5;
             cell = _cells[index];
 
-            if (cell.Part && cell.Part.Type.Category != stat.Parts[i].Type.Category)
+            part = cell.Part;
+            if (part && part.Type.Category != stat.Parts[i].Type.Category)
             {
                 cell.UnRegistry();
-                cell.Part.DestroyPart();
+                part.DestroyPart();
             }
             
             SpawnPartToCell(stat.Parts[i].Type.GetPart(stat.LevelsOf), cell);
@@ -281,7 +280,7 @@ public class PlayerGrid : MonoBehaviour
         return requireOrientations.Length > 0;
     }
     
-    public bool HaveNeighbors(Part part, GridCell cell, PartCategory typeExceptation = PartCategory.Default, bool ignoreBlock = false)
+    public bool HaveNeighbors(Part part, GridCell cell, List<PartCategory> typeExceptation = null, bool ignoreBlock = false)
     {
         bool value = false;
         GridCell[] neighbors = GetNeighborCellsIndex(_cells.IndexOf(cell), ignoreBlock);
@@ -290,10 +289,26 @@ public class PlayerGrid : MonoBehaviour
         {
             // Debug.Log(part.Type.Category + ", " + _cells.IndexOf(cell) + " - " + VARIABLE);
             if (VARIABLE && VARIABLE.Part && (VARIABLE != part.GetGridCell() || VARIABLE.AdditionalPart == part) 
-                && VARIABLE.Part != part && VARIABLE.Part.Type.Category != typeExceptation)
+                && VARIABLE.Part != part && (typeExceptation == null || !typeExceptation.Contains(VARIABLE.Part.Type.Category)
+                && VARIABLE.Part.Type.Category != PartCategory.Grid && VARIABLE.Part.Type.Category != PartCategory.Cabin))
             {
-                if(VARIABLE.Part.Type.Category != PartCategory.Grid && VARIABLE.Part.Type.Category != PartCategory.Cabin) continue;
-                
+                value = true;
+                break;
+            }
+        }
+
+        return value;
+    }
+    
+    public bool HaveRequireNeighbors(Part part, GridCell cell, PartCategory requireCategory, bool ignoreBlock = false)
+    {
+        bool value = false;
+        GridCell[] neighbors = GetNeighborCellsIndex(_cells.IndexOf(cell), ignoreBlock);
+        
+        foreach (var VARIABLE in neighbors)
+        {
+            if (VARIABLE && VARIABLE.Part && VARIABLE.Part != part && requireCategory == VARIABLE.Part.Type.Category)
+            {
                 value = true;
                 break;
             }

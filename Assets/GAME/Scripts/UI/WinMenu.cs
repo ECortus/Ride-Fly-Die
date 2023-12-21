@@ -37,6 +37,7 @@ public class WinMenu : MonoBehaviour
     private async void On()
     {
         int multiplier = PlayerController.Multiplier;
+        // Debug.Log(multiplier + " - reward multiplier");
         
         goldReward = rewards.GoldReward(flyLength, multiplier);
         gemReward = rewards.GemReward(flyLength, multiplier);
@@ -107,6 +108,6 @@ public class WinMenu : MonoBehaviour
         await DarkEclipse.PlayReverse();
         menuObject.SetActive(false);
         
-        GameManager.Instance.MergeGame();
+        GameManager.MergeGame();
     }
 }

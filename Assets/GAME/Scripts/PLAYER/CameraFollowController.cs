@@ -84,7 +84,7 @@ public class CameraFollowController : MonoBehaviour
             // cam.transform.localEulerAngles = Vector3.zero;
             // cam.fieldOfView = 60;
             
-            transform.position = Vector3.Slerp(transform.position, position, speedMove * Time.deltaTime);
+            transform.position = Vector3.SlerpUnclamped(transform.position, position, speedMove * Time.deltaTime);
         }
     }
 }

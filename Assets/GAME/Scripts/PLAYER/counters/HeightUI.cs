@@ -6,11 +6,10 @@ using UnityEngine;
 
 public class HeightUI : MonoBehaviour
 {
-    private PlayerController player => PlayerController.Instance;
     [SerializeField] private TextMeshProUGUI text;
     
     private void FixedUpdate()
     {
-        text.text = $"{Mathf.RoundToInt(player.GetDistanceToGround())}m";
+        text.text = $"{Mathf.RoundToInt(GameManager.FlyHeight)}m";
     }
 }

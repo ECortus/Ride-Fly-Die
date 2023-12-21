@@ -115,7 +115,7 @@ public class PlayerController : MonoBehaviour
     }
 
     private Vector3 startMousePosition, currentMousePosition;
-    private float mouseRotateInput;
+    public float mouseRotateInput { get; private set; }
     
     private float mouseLength = 15f;
 
@@ -123,6 +123,14 @@ public class PlayerController : MonoBehaviour
     {
         if (GameManager.GameStarted && Launched)
         {
+            if (Body.velocity.z < 0.05f && engine.onGround)
+            {
+                GameManager.OnGameFinish -= Crash;
+                GameManager.FinishGame();
+                GameManager.OnGameFinish += Crash;
+                return;
+            }
+            
             if (Input.GetMouseButtonDown(0))
             {
                 startMousePosition = Input.mousePosition;

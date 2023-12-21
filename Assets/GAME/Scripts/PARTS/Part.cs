@@ -136,6 +136,19 @@ public abstract class Part : MonoBehaviour
         return PlayerGrid.Instance.HaveNeighbors(this,  _currentGridCell, out neighbor);
     }
 
+    [Space] 
+    [SerializeField] private Material[] standartMaterials;
+
+    [ContextMenu("Set Standart Material")]
+    public void SetStandartMaterial()
+    {
+        MeshRenderer[] meshes = GetComponentsInChildren<MeshRenderer>();
+        foreach (var VARIABLE in meshes)
+        {
+            VARIABLE.materials = standartMaterials;
+        }
+    }
+
     protected virtual void Awake()
     {
         Init();
@@ -430,8 +443,21 @@ public abstract class Part : MonoBehaviour
     protected virtual void OnMouseDown()
     {
         if (GameManager.GameStarted || _blockAll || BlockMove) return;
-        
-        if (Type.Category == PartCategory.Grid && PlayerGrid.Instance.HaveNeighbors(this, _currentGridCell, PartCategory.Cabin)) return;
+
+        if (Type.Category == PartCategory.Grid)
+        {
+            if (PlayerGrid.Instance.HaveNeighbors(this, _currentGridCell,new List<PartCategory>() { PartCategory.Cabin, PartCategory.Grid }))
+            {
+                return;
+            }
+            
+            if (PlayerGrid.Instance.HaveRequireNeighbors(this, _currentGridCell, PartCategory.Cabin)
+                && PlayerGrid.Instance.HaveRequireNeighbors(this, _currentGridCell, PartCategory.Grid))
+            {
+                return;
+            }
+        }
+            
         
         if (_dragedPart == null)
         {

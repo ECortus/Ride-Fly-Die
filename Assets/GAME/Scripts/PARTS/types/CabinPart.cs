@@ -37,7 +37,7 @@ public class CabinPart : Part
     {
         if (other.gameObject.layer == LayerMask.NameToLayer("Hit"))
         {
-            GameManager.Instance.FinishGame();
+            GameManager.FinishGame();
         }
     }
 }

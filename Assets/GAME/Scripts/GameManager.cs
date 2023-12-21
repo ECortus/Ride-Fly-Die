@@ -11,13 +11,13 @@ public class GameManager : MonoBehaviour
     public static bool GameStarted;
     
     public static Action OnMergeGame { get; set; }
-    void GameMerge() => OnMergeGame?.Invoke();
+    static void GameMerge() => OnMergeGame?.Invoke();
     
     public static Action OnGameStart { get; set; }
-    void GameStart() => OnGameStart?.Invoke();
+    static void GameStart() => OnGameStart?.Invoke();
     
     public static Action OnGameFinish { get; set; }
-    void GameFinish() => OnGameFinish?.Invoke();
+    static void GameFinish() => OnGameFinish?.Invoke();
 
     public static float FlyLength
     {
@@ -32,6 +32,8 @@ public class GameManager : MonoBehaviour
             return (from - to).magnitude;
         }
     }
+    
+    public static float FlyHeight => PlayerController.Instance.GetDistanceToGround();
 
     [SerializeField] private PlayerController player;
     public static Vector3 LaunchPos { get; private set; }
@@ -43,7 +45,7 @@ public class GameManager : MonoBehaviour
         LaunchPos = player.transform.position;
         
         OnGameFinish += RecordMaxFlyLength;
-        // if (!Tutorial.Completed) OnMergeGame += CheckTutorial;
+        if (!Tutorial.Completed) OnMergeGame += CheckTutorial;
     }
 
     void Start()
@@ -63,7 +65,7 @@ public class GameManager : MonoBehaviour
         }
     }
     
-    public async void MergeGame()
+    public static async void MergeGame()
     {
         LaunchController.Blocked = true;
         PlayerController.Instance.SpawnToPos(LaunchPos);
@@ -74,7 +76,7 @@ public class GameManager : MonoBehaviour
         await DarkEclipse.Play();
     }
     
-    public async void StartGame()
+    public static async void StartGame()
     {
         if (GameStarted) return;
         
@@ -90,7 +92,7 @@ public class GameManager : MonoBehaviour
         }
     }
     
-    public void FinishGame()
+    public static void FinishGame()
     {
         if (!GameStarted) return;
         

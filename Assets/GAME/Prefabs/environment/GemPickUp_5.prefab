@@ -48,10 +48,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _amount: 5
-  accelerateSpeed: 0.25
-  accelerateTime: 1
+  accelerateSpeed: 0.65
+  accelerateTime: 0.25
   toRotate: {fileID: 7121116106785827028}
-  rotateSpeed: 25
+  rotateSpeed: 35
   particle: {fileID: 7922194803838478786}
 --- !u!135 &6887820648576537553
 SphereCollider:
@@ -72,7 +72,7 @@ SphereCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Radius: 1.25
+  m_Radius: 2
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &5712967372301552249
 GameObject:

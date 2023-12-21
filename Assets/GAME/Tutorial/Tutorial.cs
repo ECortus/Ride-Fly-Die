@@ -10,7 +10,7 @@ public class Tutorial : MonoBehaviour
 {
     private static Tutorial Instance { get; set; }
     
-    public static bool Completed => IterationsCompleted >= -1;
+    public static bool Completed => IterationsCompleted >= 4;
     
     public static int IterationsCompleted
     {
@@ -75,9 +75,7 @@ public class Tutorial : MonoBehaviour
     
     [Space]
     [SerializeField] private Button play1Button;
-    [SerializeField] private Button play2Button;
-    [SerializeField] private Button buyButton;
-    [SerializeField] private Button backButton;
+    [SerializeField] private Button play2Button, buyButton, backButton, restartButton, settingsButton;
 
     [Space]
     [SerializeField] private Transform mergePos;
@@ -111,6 +109,10 @@ public class Tutorial : MonoBehaviour
     
     [SerializeField] private Transform[] cellsPoses;
     [SerializeField] private Transform detailPosWheel, detailPosFan, detailPosWings;
+
+    [Space] 
+    [SerializeField] private GameObject rotateObj;
+    [SerializeField] private Transform rotatePos1, rotatePos2;
 
     int GetIndexOfPartOnMerge(PartType type, int lvl = -1, int indexIgnored = -1)
     {
@@ -284,7 +286,7 @@ public class Tutorial : MonoBehaviour
                 SetLayer(1);
                 
                 Gold.Plus(Mathf.Clamp(BuyPart.Cost - Gold.Value, 0, 999));
-                await UniTask.WaitUntil(() => MergeFieldHaveType(wheels, 1));
+                await UniTask.WaitUntil(() => MergeFieldHaveType(wheels, 2));
             }
             
             Part.SetBlock(false);
@@ -295,11 +297,11 @@ public class Tutorial : MonoBehaviour
 
                 Transform trg1, trg2;
                 
-                index = GetIndexOfPartOnMerge(wheels, 1);
+                index = GetIndexOfPartOnMerge(wheels, 0);
                 trg1 = cellsPoses[index];
                 SetCellLayer(index);
 
-                index = GetIndexOfPartOnMerge(wheels, 1, index);
+                index = GetIndexOfPartOnMerge(wheels, 0, index);
                 trg2 = cellsPoses[index];
                 SetCellLayer(index);
                 
@@ -377,7 +379,7 @@ public class Tutorial : MonoBehaviour
             index = GetIndexOfPartOnMerge(wings);
             target = cellsPoses[index];
             
-            HandMove(target.position, detailPosFan.position);
+            HandMove(target.position, detailPosWings.position);
             SetCellLayer(index);
             
             Part.SetBlock(false);
@@ -434,13 +436,15 @@ public class Tutorial : MonoBehaviour
         if (GetPartOnGrid(index1))
         {
             HandMove(grid1Pos.position, grid2Pos.position);
-            await UniTask.WaitUntil(() => GetPartOnGrid(index2));
+            // await UniTask.WaitUntil(() => GetPartOnGrid(index2));
         }
         else if (GetPartOnGrid(index2))
         {
             HandMove(grid2Pos.position, grid1Pos.position);
-            await UniTask.WaitUntil(() => GetPartOnGrid(index1));
+            // await UniTask.WaitUntil(() => GetPartOnGrid(index1));
         }
+        
+        await UniTask.WaitUntil(() => Input.GetMouseButtonUp(0));
 
         HandOff();
         SetLayer(-1);
@@ -448,6 +452,34 @@ public class Tutorial : MonoBehaviour
         SetAllButtons(true);
 
         IterationsCompleted = 4;
+    }
+
+    public static void PlaneIteration()
+    {
+        // Instance._PlaneIteration();
+    }
+
+    private async void _PlaneIteration()
+    {
+        if (Mathf.Abs(PlayerController.Instance.mouseRotateInput) <= 0)
+        {
+            SetAllButtons(false);
+            SetLayer(-1);
+
+            Time.timeScale = 0;
+        
+            rotateObj.SetActive(true);
+            HandMove(rotatePos1.position, rotatePos2.position);
+
+            await UniTask.WaitUntil(() => Mathf.Abs(PlayerController.Instance.mouseRotateInput) > 0.1f);
+        
+            rotateObj.SetActive(false);
+        
+            Time.timeScale = 1;
+        
+            HandOff();
+            SetAllButtons(true);
+        }
     }
 
     void SetAllButtons(bool state)
@@ -467,7 +499,8 @@ public class Tutorial : MonoBehaviour
         hand.localScale = Vector3.one;
         hand.DOMove(second, doTime)
             .SetLoops(-1, LoopType.Yoyo)
-            .SetEase(Ease.InOutSine);
+            .SetEase(Ease.InOutSine)
+            .SetUpdate(true);
     }
 
     void HandScale(Vector3 pos)
@@ -479,7 +512,8 @@ public class Tutorial : MonoBehaviour
         hand.localScale = Vector3.one;
         hand.DOScale(Vector3.one * 0.75f, doTime)
             .SetLoops(-1, LoopType.Yoyo)
-            .SetEase(Ease.InOutSine);
+            .SetEase(Ease.InOutSine)
+            .SetUpdate(true);
     }
 
     void HandOff()

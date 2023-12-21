@@ -95,7 +95,7 @@ public class GetPartUpgrade : MonoBehaviour
         HideMenu();
         menuObject.SetActive(true);
         
-        levelText.text = $"Level 0{level.ToString()}";
+        levelText.text = $"Level 0{(level + 1).ToString()}";
         
         if (type.Category == PartCategory.Boost)
         {
@@ -132,7 +132,7 @@ public class GetPartUpgrade : MonoBehaviour
     public void Off()
     {
         HideMenu();
-        gameObject.SetActive(false);
+        menuObject.SetActive(false);
     }
     
     void HideMenu()

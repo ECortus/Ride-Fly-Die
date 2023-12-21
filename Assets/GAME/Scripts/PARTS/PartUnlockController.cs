@@ -25,6 +25,9 @@ public class PartUnlockController : MonoBehaviour
 
     public void Refresh()
     {
+        detailsView.SetActive(false);
+        gridsView.SetActive(false);
+        
         if (!PartUnlocked.Wheels && GameManager.FlyLength > minFlyToTutorialUnlock)
         {
             PartUnlocked.Wheels = true;
@@ -37,7 +40,11 @@ public class PartUnlockController : MonoBehaviour
         }
         else if (PartUnlocked.Wheels && PartUnlocked.Wings)
         {
-            PartUnlocked.Grids = true;
+            if (grids.Stats[1].RequireDistance <= Records.MaxDistance)
+            {
+                PartUnlocked.Grids = true;
+            }
+            
             SetGrids();
         }
     }

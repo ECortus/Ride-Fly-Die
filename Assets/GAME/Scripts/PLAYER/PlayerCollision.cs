@@ -17,7 +17,7 @@ public class PlayerCollision : MonoBehaviour
         if (condition(go))
         {
             // PlayerController.Instance.Crash();
-            GameManager.Instance.FinishGame();
+            GameManager.FinishGame();
         }
     }
     
@@ -28,7 +28,7 @@ public class PlayerCollision : MonoBehaviour
         if (condition(go))
         {
             // PlayerController.Instance.Crash();
-            GameManager.Instance.FinishGame();
+            GameManager.FinishGame();
         }
     }
 }

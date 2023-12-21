@@ -105,6 +105,8 @@ public class AircraftEngine : MonoBehaviour
     public void ClearParts()
     {
         if (ConnectedParts != null) ConnectedParts.Clear();
+
+        defaultPosition = null;
         defaultRotation = null;
 
         boostDirection = accelerationDirection = planeDirection = Vector3.zero;
@@ -401,11 +403,12 @@ public class AircraftEngine : MonoBehaviour
         
         if (onGround)
         {
-            // if (motor == 0 || Mathf.Sign(motor) != Mathf.Sign(forwardVelocity))
-            // {
-            //     velocity -= crossForward * Mathf.Sign(forwardVelocity) * Mathf.Min(Mathf.Abs(forwardVelocity), forwardFriction * scaleAdjustment * deltaTime);
-            // }
-            // velocity -= crossRight * Mathf.Sign(rightVelocity) * Mathf.Min(Mathf.Abs(rightVelocity), lateralFriction * scaleAdjustment * deltaTime);
+            if (motor == 0 || Mathf.Sign(motor) != Mathf.Sign(forwardVelocity))
+            {
+                velocity -= crossForward * Mathf.Sign(forwardVelocity) * 
+                            Mathf.Min(Mathf.Abs(forwardVelocity), forwardFriction * scaleAdjustment * deltaTime) * 1.5f;
+            }
+            velocity -= crossRight * Mathf.Sign(rightVelocity) * Mathf.Min(Mathf.Abs(rightVelocity), lateralFriction * scaleAdjustment * deltaTime);
         }
         
         float slopeMultiplier = Mathf.Max(0, (Mathf.Sign(motor) * slopeDelta * slopeFriction * scaleAdjustment + 1f));
@@ -429,7 +432,7 @@ public class AircraftEngine : MonoBehaviour
                 * planeModificator * gravityMultiplier;
         }
 
-        if (!PlayerController.Launched)
+        if (!PlayerController.Launched || !GameManager.GameStarted)
         {
             velocity.x = 0;
             if (onGround) velocity.y = 0;
@@ -438,6 +441,8 @@ public class AircraftEngine : MonoBehaviour
         
         SetVelocity(velocity);
     }
+    
+    private Vector3[] defaultPosition;
 
     void SetVelocity(Vector3 velocity)
     {
@@ -445,10 +450,20 @@ public class AircraftEngine : MonoBehaviour
         
         if (ConnectedParts == null) return;
         
+        if (defaultPosition == null)
+        {
+            defaultPosition = new Vector3[ConnectedParts.Count];
+            for (int i = 0; i < ConnectedParts.Count; i++)
+            {
+                defaultPosition[i] = ConnectedParts[i].transform.localPosition;
+            }
+        }
+        
         for (int i = 0; i < ConnectedParts.Count; i++)
         {
             if (ConnectedParts[i])
             {
+                ConnectedParts[i].Body.transform.localPosition = defaultPosition[i];
                 ConnectedParts[i].Body.velocity = velocity;
             }
         }
@@ -472,27 +487,25 @@ public class AircraftEngine : MonoBehaviour
     void SetRotation(Quaternion rotation)
     {
         Body.MoveRotation(rotation);
+
+        if (ConnectedParts == null) return;
         
-        // if (ConnectedParts == null) return;
-        //
-        // if (defaultRotation == null)
-        // {
-        //     defaultRotation = new Quaternion[ConnectedParts.Count];
-        //     for (int i = 0; i < ConnectedParts.Count; i++)
-        //     {
-        //         defaultRotation[i] = ConnectedParts[i].transform.localRotation;
-        //     }
-        // }
-        //
-        // Quaternion rotate;
-        // for (int i = 0; i < ConnectedParts.Count; i++)
-        // {
-        //     if (ConnectedParts[i])
-        //     {
-        //         rotate = Quaternion.Euler(rotation.eulerAngles + defaultRotation[i].eulerAngles);
-        //         ConnectedParts[i].Body.MoveRotation(rotate);
-        //     }
-        // }
+        if (defaultRotation == null)
+        {
+            defaultRotation = new Quaternion[ConnectedParts.Count];
+            for (int i = 0; i < ConnectedParts.Count; i++)
+            {
+                defaultRotation[i] = ConnectedParts[i].transform.localRotation;
+            }
+        }
+        
+        for (int i = 0; i < ConnectedParts.Count; i++)
+        {
+            if (ConnectedParts[i])
+            {
+                ConnectedParts[i].Body.transform.localRotation = defaultRotation[i];
+            }
+        }
     }
     
     void OnDestroy()
