@@ -136,7 +136,7 @@ PlayerSettings:
   vulkanEnableLateAcquireNextImage: 0
   vulkanEnableCommandBufferRecycling: 1
   loadStoreDebugModeEnabled: 0
-  bundleVersion: 0.89b
+  bundleVersion: 1.21b
   preloadedAssets: []
   metroInputSource: 0
   wsaTransparentSwapchain: 0
@@ -773,7 +773,7 @@ PlayerSettings:
   m_RenderingPath: 1
   m_MobileRenderingPath: 1
   metroPackageName: Ride-Fly-Die
-  metroPackageVersion: 
+  metroPackageVersion: 1.0.0.0
   metroCertificatePath: 
   metroCertificatePassword: 
   metroCertificateSubject: 
@@ -781,7 +781,7 @@ PlayerSettings:
   metroCertificateNotAfter: daf06edb8a9952ca
   metroApplicationDescription: Ride-Fly-Die
   wsaImages: {}
-  metroTileShortName: 
+  metroTileShortName: Fly Occlusion
   metroTileShowName: 0
   metroMediumTileShowName: 0
   metroLargeTileShowName: 0

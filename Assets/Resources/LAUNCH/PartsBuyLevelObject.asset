@@ -13,5 +13,5 @@ MonoBehaviour:
   m_Name: PartsBuyLevelObject
   m_EditorClassIdentifier: 
   <MaxLevel>k__BackingField: 4
-  defaultCost: 18
-  multipleCostPerLevel: 1.9
+  defaultCost: 1000
+  multipleCostPerLevel: 1.75

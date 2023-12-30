@@ -20,7 +20,7 @@ MonoBehaviour:
       IndexOffset: {x: 0, y: 0}
     LevelsOf: 0
     RequireDistance: 0
-    Sprite: {fileID: 21300000, guid: e7cdcbba89e62634fa3712ef35136894, type: 3}
+    Sprite: {fileID: 21300000, guid: b1e9d07827a02294c86c8139372be68f, type: 3}
   - Parts:
     - Type: {fileID: 11400000, guid: 7172cec7db3e97e46bf4169570ece56a, type: 2}
       IndexOffset: {x: 0, y: 0}
@@ -28,7 +28,7 @@ MonoBehaviour:
       IndexOffset: {x: 1, y: 0}
     LevelsOf: 1
     RequireDistance: 400
-    Sprite: {fileID: 21300000, guid: f4ffaa5b858971c4e8d32ca5bae2ebd8, type: 3}
+    Sprite: {fileID: 21300000, guid: b1e9d07827a02294c86c8139372be68f, type: 3}
   - Parts:
     - Type: {fileID: 11400000, guid: 7172cec7db3e97e46bf4169570ece56a, type: 2}
       IndexOffset: {x: 0, y: 0}
@@ -38,7 +38,7 @@ MonoBehaviour:
       IndexOffset: {x: 1, y: 0}
     LevelsOf: 2
     RequireDistance: 1500
-    Sprite: {fileID: 21300000, guid: ff374ad61b0e41b4b9a4c516563fd542, type: 3}
+    Sprite: {fileID: 21300000, guid: 5385504dfb3f068459d6506515f334d3, type: 3}
   - Parts:
     - Type: {fileID: 11400000, guid: 7172cec7db3e97e46bf4169570ece56a, type: 2}
       IndexOffset: {x: 0, y: 0}
@@ -48,7 +48,7 @@ MonoBehaviour:
       IndexOffset: {x: 1, y: 0}
     LevelsOf: 3
     RequireDistance: 1750
-    Sprite: {fileID: 21300000, guid: 3ac91d96b9556e7428e1aa0b4bc6dcd0, type: 3}
+    Sprite: {fileID: 21300000, guid: e356b25b581b97f4c83c26293a0bbc5b, type: 3}
   - Parts:
     - Type: {fileID: 11400000, guid: 7172cec7db3e97e46bf4169570ece56a, type: 2}
       IndexOffset: {x: 0, y: 0}
@@ -58,4 +58,4 @@ MonoBehaviour:
       IndexOffset: {x: 1, y: 0}
     LevelsOf: 4
     RequireDistance: 2500
-    Sprite: {fileID: 21300000, guid: 6b7edfeacf76cfb4abf1f25aab0b759e, type: 3}
+    Sprite: {fileID: 21300000, guid: fcaf692dc826ed1459d88460a6695a46, type: 3}

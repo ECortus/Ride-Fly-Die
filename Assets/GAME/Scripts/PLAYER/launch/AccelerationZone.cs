@@ -13,7 +13,16 @@ public class AccelerationZone : MonoBehaviour
     {
         if (Condition(other.gameObject))
         {
-            PlayerController.Instance.AccelerateForward(speed);
+            // PlayerController.Instance.AccelerateForward(speed);
+            AircraftEngine.EnterAccelerationZone(speed);
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (Condition(other.gameObject))
+        {
+            AircraftEngine.ExitAccelerationZone();
         }
     }
 }

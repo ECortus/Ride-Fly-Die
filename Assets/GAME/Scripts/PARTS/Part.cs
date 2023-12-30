@@ -142,7 +142,7 @@ public abstract class Part : MonoBehaviour
     [ContextMenu("Set Standart Material")]
     public void SetStandartMaterial()
     {
-        MeshRenderer[] meshes = GetComponentsInChildren<MeshRenderer>();
+        MeshRenderer[] meshes = GetComponentsInChildren<MeshRenderer>(true);
         foreach (var VARIABLE in meshes)
         {
             VARIABLE.materials = standartMaterials;
@@ -157,27 +157,27 @@ public abstract class Part : MonoBehaviour
     void OnGameStart()
     {
         // if(Body) Destroy(Body);
-        Body.isKinematic = false;
         Part neighbor;
-
-        Body.interpolation = RigidbodyInterpolation.None;
-        Body.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
 
         if (HaveRequireNeighbors(out neighbor) || Type.Category == PartCategory.Cabin || Type.Category == PartCategory.Grid)
         {
-            Body.useGravity = false;
-            
             // if (Type.Category != PartCategory.Cabin) Joint.connectedBody = neighbor.Body;
             // else Joint.connectedBody = PlayerController.Instance.Body;
             
-            Joint.connectedBody = PlayerController.Instance.Body;
+            // Joint.connectedBody = PlayerController.Instance.Body;
+            // Body.useGravity = false;
             
-            AddMod();
+            // AddMod();
         }
         else
         {
             Disconnect();
         }
+        
+        Body.isKinematic = false;
+
+        // Body.interpolation = RigidbodyInterpolation.Extrapolate;
+        // Body.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
         
         SwitchObjects(true);
         SwitchColliders(true);
@@ -186,12 +186,26 @@ public abstract class Part : MonoBehaviour
 
     void AddMod()
     {
-        PlayerController.Instance.AddPart(this);
+        Body.isKinematic = true;
+        Body.useGravity = false;
+        Body.interpolation = RigidbodyInterpolation.Extrapolate;
+        
+        Joint.connectedBody = PlayerController.Instance.Body;
+        Joint.anchor = Vector3.zero;
+        Joint.connectedAnchor = transform.localPosition;
+        
+        ConnectedParts.Add(this);
     }
     
     void RemoveMod()
     {
-        PlayerController.Instance.RemovePart(this);
+        Body.interpolation = RigidbodyInterpolation.None;
+        
+        Joint.connectedBody = null;
+        Joint.anchor = Vector3.zero;
+        Joint.connectedAnchor = Vector3.zero;
+        
+        ConnectedParts.Remove(this);
     }
     
     [ContextMenu("Write default destrict")]
@@ -260,6 +274,11 @@ public abstract class Part : MonoBehaviour
         Body.isKinematic = true;
         Body.useGravity = false;
         Body.mass = Mass;
+
+        Joint.connectedBody = null;
+        Joint.autoConfigureConnectedAnchor = false;
+        Joint.anchor = Vector3.zero;
+        Joint.connectedAnchor = Vector3.zero;
     }
 
     void Update()
@@ -277,11 +296,26 @@ public abstract class Part : MonoBehaviour
                 SwitchGridCollider(true);
             }
         }
+
+        if (_currentGridCell)
+        {
+            Debug.Log($"----------------{name} {Level}----------------");
+            Debug.Log(Joint.anchor);
+            Debug.Log(Joint.connectedAnchor);
+            Debug.Log(transform.localPosition);
+        }
     }
-    
-    void FixedUpdate()
+
+    public void SetLocalPosition(Vector3 local)
     {
-        
+        transform.localPosition = local;
+        Body.position = transform.position;
+    }
+
+    public void SetLocalRotation(Quaternion local)
+    {
+        transform.localRotation = local;
+        Body.rotation = transform.rotation;
     }
     
     public void SetGrid(GridCell cell)
@@ -290,6 +324,11 @@ public abstract class Part : MonoBehaviour
         {
             if (_currentGridCell.AdditionalPart && _currentGridCell.AdditionalPart == this) _currentGridCell.UnRegistryAdditional();
             else if (_currentGridCell.Part == this) _currentGridCell.UnRegistry();
+
+            if (cell == null)
+            {
+                RemoveMod();
+            }
         }
         _currentGridCell = cell;
         
@@ -305,6 +344,11 @@ public abstract class Part : MonoBehaviour
         if (_currentGridCell)
         {
             if (_currentGridCell.AdditionalPart && _currentGridCell.AdditionalPart == this) _currentGridCell.UnRegistryAdditional();
+            
+            if (cell == null)
+            {
+                RemoveMod();
+            }
         }
         _currentGridCell = cell;
         
@@ -324,6 +368,8 @@ public abstract class Part : MonoBehaviour
         {
             if (_currentGridCell.AdditionalPart && _currentGridCell.AdditionalPart == this) _currentGridCell.UnRegistryAdditional();
             else if(_currentGridCell.Part == this) _currentGridCell.UnRegistry();
+            
+            RemoveMod();
         }
         _currentGridCell = null;
         
@@ -393,8 +439,6 @@ public abstract class Part : MonoBehaviour
         Destrict.gameObject.SetActive(true);
         Destrict.TurnOn(250);
         
-        RemoveMod();
-        
         Disconnect();
         Body.isKinematic = true;
         
@@ -404,7 +448,9 @@ public abstract class Part : MonoBehaviour
 
     void Disconnect()
     {
-        Destroy(Joint);
+        RemoveMod();
+
+        Joint.connectedBody = null;
         Body.isKinematic = false;
         Body.useGravity = true;
         
@@ -432,6 +478,8 @@ public abstract class Part : MonoBehaviour
     
     public virtual void DestroyPart()
     {
+        RemoveMod();
+        
         SetActions(false);
         GameManager.OnMergeGame -= DestroyPart;
         
@@ -446,18 +494,19 @@ public abstract class Part : MonoBehaviour
 
         if (Type.Category == PartCategory.Grid)
         {
-            if (PlayerGrid.Instance.HaveNeighbors(this, _currentGridCell,new List<PartCategory>() { PartCategory.Cabin, PartCategory.Grid }))
+            if (PlayerGrid.Instance.HaveRequireNeighbors(this, _currentGridCell, PartCategory.Boost, true)
+                || PlayerGrid.Instance.HaveRequireNeighbors(this, _currentGridCell, PartCategory.Wheels, true)
+                || PlayerGrid.Instance.HaveRequireNeighbors(this, _currentGridCell, PartCategory.Wings, true))
             {
                 return;
             }
             
-            if (PlayerGrid.Instance.HaveRequireNeighbors(this, _currentGridCell, PartCategory.Cabin)
-                && PlayerGrid.Instance.HaveRequireNeighbors(this, _currentGridCell, PartCategory.Grid))
+            if (PlayerGrid.Instance.HaveRequireNeighbors(this, _currentGridCell, PartCategory.Cabin, true)
+                && PlayerGrid.Instance.HaveRequireNeighbors(this, _currentGridCell, PartCategory.Grid, true))
             {
                 return;
             }
         }
-            
         
         if (_dragedPart == null)
         {
@@ -491,10 +540,12 @@ public abstract class Part : MonoBehaviour
             // else Debug.Log(null);
             
             GridCell selectedGrid = GridCell.SelectedCell;
-            if (selectedGrid) PlayerGrid.Instance.UpdateRequireOrientation();
+            // Debug.Log(selectedGrid);
             
             if (selectedGrid)
             {
+                PlayerGrid.Instance.UpdateRequireOrientation();
+                
                 if (PreShowOnPlayer)
                 {
                     if (selectedGrid.Part && !selectedGrid.Part.Orientations.Block.Front 
@@ -606,7 +657,8 @@ public abstract class Part : MonoBehaviour
                     
                     return;
                 }
-                else if (!selectedGrid.Part && (!_currentGridCell || selectedGrid != _currentGridCell)
+                
+                if (!selectedGrid.Part && (!_currentGridCell || selectedGrid != _currentGridCell)
                     && PlayerGrid.Instance.HaveNeighbors(this, selectedGrid) && PlayerGrid.Instance.HaveOrientation(Orientations))
                 {
                     selectedGrid.Registry(this);
@@ -691,6 +743,8 @@ public abstract class Part : MonoBehaviour
         {
             if(_currentGridCell.AdditionalPart && _currentGridCell.AdditionalPart == this) _currentGridCell.UnRegistryAdditional();
             if(_currentGridCell.Part && _currentGridCell.Part == this) _currentGridCell.UnRegistry();
+            
+            RemoveMod();
         }
                     
         if(_currentMergeCell && _currentMergeCell.Part == this) _currentMergeCell.UnRegistry();
@@ -708,6 +762,9 @@ public abstract class Part : MonoBehaviour
         
         ChangeColor(true);
         
+        ApplyOrientation();
+        
+        AddMod();
         // OnPartPlaceOnGrid();
     }
 
@@ -724,6 +781,7 @@ public abstract class Part : MonoBehaviour
         SetOrientation(PartOrientation.Default);
         ChangeColor(true);
         
+        ApplyOrientation();
         // OnPartPlaceOnMergeZone();
     }
 
@@ -768,15 +826,13 @@ public abstract class Part : MonoBehaviour
     
     public virtual bool VisualMode { protected get; set; }
 
-    private bool condition(GameObject go) =>
-        go.layer == LayerMask.NameToLayer("Hit") 
-    //|| go.layer == LayerMask.NameToLayer("Ground")
-    ;
+    private bool Condition(GameObject go) =>
+        go.layer == LayerMask.NameToLayer("Hit") && GameManager.GameStarted && PlayerController.Launched;
     
     public virtual void OnCollisionEnter(Collision other)
     {
         // Debug.Log("COLLISING WITH " + other.gameObject);
-        if (condition(other.gameObject))
+        if (Condition(other.gameObject))
         {
             CrashPart();
         }

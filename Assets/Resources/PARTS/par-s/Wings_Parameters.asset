@@ -9,11 +9,8 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1334ee460f2de8848ba8bc83e47c1870, type: 3}
-  m_Name: LaunchPowerObject
+  m_Script: {fileID: 11500000, guid: 85263286af5c5bd4da9c394b28721d10, type: 3}
+  m_Name: Wings_Parameters
   m_EditorClassIdentifier: 
-  <MaxLevel>k__BackingField: 999
-  powerDefault: 15
-  powerMultiple: 1.25
-  defaultCost: 25
-  multipleCostPerLevel: 1.8
+  defaultFlyModifier: 0.25
+  multiple: 0.1

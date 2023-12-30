@@ -86,7 +86,7 @@ public class BuyPart : MonoBehaviour
         }
         else
         {
-            type = TypesToBuy[Random.Range(0, TypesToBuy.Length)];
+            type = GetTypeToBuy();
         }
         
         int lvl = Upgrades.PartsBuyLevel;
@@ -94,6 +94,21 @@ public class BuyPart : MonoBehaviour
         
         MergeGrid.Instance.SpawnPart(part);
         Refresh();
+    }
+
+    PartType GetTypeToBuy()
+    {
+        PartType type = TypesToBuy[Random.Range(0, TypesToBuy.Length)];
+
+        if ((type.Category == PartCategory.Wheels && !PartUnlocked.Wheels)
+            || (type.Category == PartCategory.Wings && !PartUnlocked.Wings))
+        {
+            return GetTypeToBuy();
+        }
+        else
+        {
+            return type;
+        }
     }
 
     public void OnButtonClick_Buy()

@@ -50,6 +50,8 @@ public class GemPickUp : MonoBehaviour
         Off();
         
         PlayerController.Instance.AccelerateForwardForTime(accelerateSpeed, accelerateTime);
+        PlayerController.Instance.PlayBarrelRoll(accelerateTime);
+        
         Gem.Plus(_amount);
     }
     

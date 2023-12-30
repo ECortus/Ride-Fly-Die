@@ -33,6 +33,12 @@ public class PlatformX5 : MonoBehaviour
             multiplier = CurrentMultiplier;
             if (multiplier > 0)
             {
+                if (PlayerController.Instance.Body.velocity.z < 0.05f && PlayerController.Instance.engine.onGround)
+                {
+                    PlayerController.Instance.ForceFinish();
+                    return;
+                }
+                
                 PlayerController.SetMultiplier(multiplier);
             }
         }

@@ -1,14 +1,17 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
+using DG.Tweening;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class PlayerController : MonoBehaviour
 {
     public static PlayerController Instance { get; private set; }
 
-    [SerializeField] private AircraftEngine engine;
-    [SerializeField] private LaunchPower LaunchPower;
+    public AircraftEngine engine;
+    [SerializeField] private LaunchPower launchPower;
     [Space] 
     [SerializeField] private GameObject countersUI;
     
@@ -34,16 +37,6 @@ public class PlayerController : MonoBehaviour
     
     public float GetDistanceToGround() => engine.GetDistanceToGround();
 
-    public void AddPart(Part part)
-    {
-        engine.AddPart(part);
-    }
-    
-    public void RemovePart(Part part)
-    {
-        engine.RemovePart(part);
-    }
-
     void Awake()
     {
         Instance = this;
@@ -52,7 +45,8 @@ public class PlayerController : MonoBehaviour
         
         OnCrash += PlayerCrash;
         OnRepair += PlayerRepair;
-        
+
+        // GameManager.OnGameStart += ConnectedParts.CalculatePosRot;
         GameManager.OnGameStart += OnGameStart;
         
         GameManager.OnMergeGame += TakeControl;
@@ -64,9 +58,23 @@ public class PlayerController : MonoBehaviour
         countersUI.SetActive(false);
     }
 
+    public async void PlayBarrelRoll(float time)
+    {
+        if (GameManager.GameStarted && Launched && !engine.onGround)
+        {
+            AircraftEngine.BlockRotation = true;
+            ResetMouse();
+
+            await engine.MakeBarrelRoll(time);
+            
+            ResetMouse();
+            AircraftEngine.BlockRotation = false;
+        }
+    }
+
     public void AccelerateForward(float speed)
     {
-        engine.AccelerateBody(Forward, speed);
+        engine.AccelerateBody(speed);
     }
     
     public void AccelerateForwardForTime(float speed, float time)
@@ -90,7 +98,7 @@ public class PlayerController : MonoBehaviour
 
         while (time > 0)
         {
-            engine.AccelerateBody(Forward, speed);
+            engine.AccelerateBody(speed);
             time -= Time.fixedDeltaTime;
             yield return null;
         }
@@ -109,7 +117,7 @@ public class PlayerController : MonoBehaviour
         Vector3 direction = DirectionFromAngle(180f, angle);
         // Vector3 direction = Forward;
         direction.y = 0;
-        engine.AccelerateBody(-direction, LaunchPower.Power, percent);
+        engine.AccelerateBody(launchPower.Power, true, percent);
         
         countersUI.SetActive(true);
     }
@@ -117,40 +125,58 @@ public class PlayerController : MonoBehaviour
     private Vector3 startMousePosition, currentMousePosition;
     public float mouseRotateInput { get; private set; }
     
-    private float mouseLength = 15f;
+    [SerializeField] private float mouseLength = 6f;
+
+    [Header("DEBUG")]
+    public List<Part> Parts;
+    public Vector3[] DefaultPoses;
+    public Quaternion[] DefaultRotations;
 
     void FixedUpdate()
     {
+        Parts = ConnectedParts.List;
+        DefaultPoses = ConnectedParts.DefaultPositions;
+        DefaultRotations = ConnectedParts.DefaultRotations;
+        
+        if (AircraftEngine.BlockRotation) return;
+        
         if (GameManager.GameStarted && Launched)
         {
-            if (Body.velocity.z < 0.05f && engine.onGround)
-            {
-                GameManager.OnGameFinish -= Crash;
-                GameManager.FinishGame();
-                GameManager.OnGameFinish += Crash;
-                return;
-            }
+            // if (Body.velocity.z < 0.05f && engine.onGround)
+            // {
+            //     ForceFinish();
+            //     return;
+            // }
             
             if (Input.GetMouseButtonDown(0))
             {
                 startMousePosition = Input.mousePosition;
+                return;
             }
             
             if (Input.GetMouseButton(0) && startMousePosition != Vector3.zero)
             {
-                currentMousePosition = Input.mousePosition;
-                mouseRotateInput = (currentMousePosition.x - startMousePosition.x) / 100f / mouseLength;
+                if (AircraftEngine.BlockRotation)
+                {
+                    ResetMouse();
+                }
+                else
+                {
+                    currentMousePosition = Input.mousePosition;
+                    mouseRotateInput = (currentMousePosition.x - startMousePosition.x) / 100f / mouseLength;
 
-                engine.inputPlaneRotate = Mathf.Clamp(mouseRotateInput, -1f, 1f);
+                    engine.inputPlaneRotate = Mathf.Clamp(mouseRotateInput, -1f, 1f);
+                }
+                
                 engine.setMotor(2);
                 return;
             }
             
-            if (Input.GetMouseButtonUp(0))
-            {
-                ResetMouse();
-                engine.setMotor(0);
-            }
+            // if (Input.GetMouseButtonUp(0))
+            // {
+            //     ResetMouse();
+            //     engine.setMotor(0);
+            // }
             
             ResetMouse();
             engine.setMotor(0);
@@ -160,6 +186,13 @@ public class PlayerController : MonoBehaviour
             ResetMouse();
             engine.setMotor(0);
         }
+    }
+
+    public void ForceFinish()
+    {
+        GameManager.OnGameFinish -= Crash;
+        GameManager.FinishGame();
+        GameManager.OnGameFinish += Crash;
     }
 
     void ResetMouse()
@@ -174,20 +207,20 @@ public class PlayerController : MonoBehaviour
     public void SpawnToPos(Vector3 pos)
     {
         Body.transform.position = pos;
+        engine.SetVelocity(Vector3.zero);
         ResetBody();
     }
 
     void CorrectSphereColliderCenter()
     {
-        Vector3 center = new Vector3(0f, -0.51f, 0f);
-        int index = PlayerGrid.Instance.MainIndex;
+        engine.Sphere.radius = 5;
+        
+        Vector3 center = new Vector3(0f, -0.5f, 0f);
 
         GridCell[] cells = PlayerGrid.Instance._cells;
         
         int size = PlayerGrid.Instance.Size;
 
-        int first = -1;
-        int last = -1;
         int lastrow = 0;
 
         for (int i = 0; i < size; i++)
@@ -200,31 +233,23 @@ public class PlayerController : MonoBehaviour
                 }
             }
         }
-        
-        for (int i = 0; i < size; i++)
-        {
-            if (cells[lastrow * 5 + i].Part)
-            {
-                if (first == -1)
-                {
-                    first = lastrow * 5 + i;
-                }
-                last = lastrow * 5 + i;
-            }
-        }
 
-        center.y += (lastrow - 2) * -1.5f;
-        
-        // int indexMiddle = lastrow * 5 + 2;
-        // float indexCenter = (last + first) / 2f;
-        // float distanceToMiddle = indexMiddle - indexCenter;
-        // center.z = distanceToMiddle * 2f;
+        center.y += (lastrow - 2) * -1.5f + (engine.Sphere.radius - 0.5f);
+
+        float z = (2 - ConnectedParts.BalanceCenter) * ConnectedParts.Balance;
+        center.z = z + ConnectedParts.BalanceCenter;
         
         engine.Sphere.center = center;
+        
+        // Debug.Log("Balance - " + ConnectedParts.Balance);
+        // Debug.Log("Center - " + ConnectedParts.BalanceCenter);
     }
     
     void OnGameStart()
     {
+        ConnectedParts.CalculatePosRot();
+        AircraftEngine.BlockRotation = false;
+        
         countersUI.SetActive(false);
         CorrectSphereColliderCenter();
         
@@ -263,17 +288,19 @@ public class PlayerController : MonoBehaviour
         Body.isKinematic = true;
         engine.enabled = false;
 
+        // engine.Sphere.radius = 0.5f;
         Launched = true;
     }
 
     private void ResetBody()
     {
+        engine.Sphere.radius = 0.5f;
         Body.isKinematic = true;
         
         engine.inputPlaneRotate = 0;
-        engine.ClearParts();
+        engine.Clear();
         
-        Body.transform.rotation = Quaternion.Euler(new Vector3(0, 180f, 0));
+        engine.SetRotation(Quaternion.Euler(new Vector3(0, 180f, 0)));
     }
     
     private Vector3 DirectionFromAngle(float eulerY, float angleInDegrees)

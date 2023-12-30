@@ -60,17 +60,17 @@ public class GetPartUpgrade : MonoBehaviour
 
         if (category == PartCategory.Boost)
         {
-            return FanLevelUnlocked <= level;
+            return FanLevelUnlocked < level;
         }
         
         if (category == PartCategory.Wheels)
         {
-            return WheelsLevelUnlocked <= level;
+            return WheelsLevelUnlocked < level;
         }
         
         if (category == PartCategory.Wings)
         {
-            return WingsLevelUnlocked <= level;
+            return WingsLevelUnlocked < level;
         }
 
         return false;

@@ -16,6 +16,7 @@ public class LaunchController : MonoBehaviour
     
     [Space]
     [SerializeField] private float maxSpace = 2f;
+    [SerializeField] private float maxRotate = 45f;
     [SerializeField] private float maxAngle = 60f;
     [Range(0f, 1f)]
     [SerializeField] private float minPercent = 0.15f;
@@ -30,6 +31,13 @@ public class LaunchController : MonoBehaviour
     
     [Space]
     [SerializeField] private TextMeshProUGUI counterPercent;
+
+    [Space] 
+    [SerializeField] private RopeColBack _ropeColBack;
+
+    [Space] 
+    [SerializeField] private GameObject ropePrefab;
+    [SerializeField] private Transform ropeParent;
 
     private Vector3 DefaultLaunchZonePosition { get; set; }
     
@@ -64,12 +72,11 @@ public class LaunchController : MonoBehaviour
     {
         if (!PlayerController.Launched && GameManager.GameStarted)
         {
-            if (Input.GetMouseButtonDown(0) && (dirStartCurrent3 == Vector3.zero || Vector3.Angle(-Vector3.forward, dirStartCurrent3) <= maxAngle))
+            if (Input.GetMouseButtonDown(0) && (dirStartCurrent3 == Vector3.zero || Vector3.Angle(-Vector3.forward, dirStartCurrent3) <= maxAngle) && isOn)
             {
                 startMousePos = Input.mousePosition;
             }
-            
-            if (Input.GetMouseButton(0) && startMousePos != Vector2.zero)
+            else if (Input.GetMouseButton(0) && startMousePos != Vector2.zero && isOn)
             {
                 currentMousePos = Input.mousePosition;
                 
@@ -78,46 +85,43 @@ public class LaunchController : MonoBehaviour
                 
                 distanceStartCurrent = (currentMousePos - startMousePos).magnitude / 100f;
                 
-                if (Vector3.Angle(-Vector3.forward, dirStartCurrent3) > maxAngle)
+                if (Vector3.Angle(-Vector3.forward, dirStartCurrent3) <= maxAngle)
                 {
-                    dirStartCurrent3 = Vector3.zero;
-                }
-                
-                if (distanceStartCurrent > maxSpace)
-                {
-                    distanceStartCurrent = maxSpace;
-                }
-
-                if (dirStartCurrent3 != Vector3.zero && !Blocked)
-                {
-                    angle = Vector3.Angle(-Vector3.forward, dirStartCurrent3);
-                    
-                    if (angle > maxAngle / 2)
+                    if (distanceStartCurrent > maxSpace)
                     {
-                        angleToDir = maxAngle / 2;
-
-                        if (Vector3.Angle(dirStartCurrent3, Vector3.right) <
-                            Vector3.Angle(dirStartCurrent3, -Vector3.right))
-                        {
-                            angleToDir *= -1;
-                        }
-                    
-                        dirStartCurrent3 = DirectionFromAngle(180f, angleToDir);
-                        angle = angleToDir;
+                        distanceStartCurrent = maxSpace;
                     }
+
+                    if (dirStartCurrent3 != Vector3.zero && !Blocked)
+                    {
+                        angle = Vector3.Angle(-Vector3.forward, dirStartCurrent3);
+                    
+                        if (angle > maxAngle / 2)
+                        {
+                            angleToDir = maxAngle / 2;
+
+                            if (Vector3.Angle(dirStartCurrent3, Vector3.right) <
+                                Vector3.Angle(dirStartCurrent3, -Vector3.right))
+                            {
+                                angleToDir *= -1;
+                            }
+                    
+                            dirStartCurrent3 = DirectionFromAngle(180f, angleToDir);
+                            angle = angleToDir;
+                        }
                 
-                    currentPos = dirStartCurrent3 * distanceStartCurrent + defaultPos;
+                        currentPos = dirStartCurrent3 * distanceStartCurrent + defaultPos;
                 
-                    SetRot(dirStartCurrent3);
-                    SetPos(currentPos);
+                        SetRot(dirStartCurrent3);
+                        SetPos(currentPos);
                 
-                    SetText(LaunchPercent);
+                        SetText(LaunchPercent);
+                    }
                 }
             }
-            
-            if (Input.GetMouseButtonUp(0))
+            else if (Input.GetMouseButtonUp(0) && isOn)
             {
-                if (distanceStartCurrent / maxSpace > minPercent && (defaultPos - toLaunch.transform.position).magnitude > distanceStartCurrent - 0.05f)
+                if (distanceStartCurrent / maxSpace > minPercent)
                 {
                     Launch();
                 }
@@ -128,17 +132,27 @@ public class LaunchController : MonoBehaviour
                     SetText(0f);
                 }
             }
+            else
+            {
+                ResetPos();
+                SetRot(-Vector3.forward);
+                SetText(0f);
+            }
         }
     }
 
+    private bool isOn = false;
+
     private async void On()
     {
-        transform.position = DefaultLaunchZonePosition - CorrectPos();
-        animObject.SetActive(true);
-
+        isOn = false;
+        
         rope.gameObject.SetActive(false);
         pillar1.localScale = Vector3.zero;
         pillar2.localScale = Vector3.zero;
+        
+        transform.position = DefaultLaunchZonePosition - CorrectPos();
+        animObject.SetActive(true);
         
         SetText(-1);
 
@@ -147,12 +161,26 @@ public class LaunchController : MonoBehaviour
 
         await UniTask.Delay((int)(animTime * 1000));
         rope.gameObject.SetActive(true);
+
+        if (ropeParent.childCount == 0)
+        {
+            GameObject rp = Instantiate(ropePrefab, ropeParent);
+            rp.SetActive(true);
+        }
+        
+        _ropeColBack.On();
+        
+        isOn = true;
     }
 
     private void Off()
     {
+        Destroy(ropeParent.GetChild(0).gameObject);
+        
         SetText(-1);
         animObject.SetActive(false);
+        
+        _ropeColBack.Off();
         
         rope.gameObject.SetActive(false);
         pillar1.localScale = Vector3.zero;
@@ -162,12 +190,11 @@ public class LaunchController : MonoBehaviour
     public void StartLaunch()
     {
         ResetLaunch();
-        
         On();
 
         defaultPos = toLaunch.transform.position;
-        defaultPos.y = -1f;
-
+        // defaultPos.y = -1f;
+        
         PlayerController.Launched = false;
     }
 
@@ -179,6 +206,7 @@ public class LaunchController : MonoBehaviour
         //     angle *= -1;
         // }
         
+        _ropeColBack.Off();
         PlayerController.Instance.Launch(LaunchPercent, angle);
         
         // Off();
@@ -191,7 +219,7 @@ public class LaunchController : MonoBehaviour
     {
         pos.y = toLaunch.transform.position.y;
         toLaunch.transform.position = pos;
-        toLaunch.Body.position = pos;
+        toLaunch.Body.position = toLaunch.transform.position;
     }
     
     public static Quaternion Rotate { get; private set; }
@@ -200,7 +228,18 @@ public class LaunchController : MonoBehaviour
     {
         // toLaunch.transform.rotation = Quaternion.LookRotation(dir);   
         // toLaunch.Body.MoveRotation(Quaternion.Lerp(toLaunch.Body.rotation, Quaternion.LookRotation(dir), rotateSpeed * Time.fixedDeltaTime));
-        Rotate = Quaternion.LookRotation(dir);
+        // dir = toLaunch.transform.TransformDirection(dir);
+        dir.y = 0;
+        Quaternion rot = Quaternion.LookRotation(dir);
+
+        if (angle > maxRotate)
+        {
+            rot = Quaternion.LookRotation(DirectionFromAngle(180f, maxRotate * Mathf.Clamp(angle, -1f, 1f)));
+        }
+
+        Rotate = rot;
+
+        // Debug.DrawRay(toLaunch.transform.position, -dir * 999f, Color.cyan);
     }
     
     void ResetPos()
@@ -228,7 +267,7 @@ public class LaunchController : MonoBehaviour
     public static Vector3 CorrectPos()
     {
         Vector3 pos = Vector3.zero;
-        float offsetZ;
+        float offsetZ = 0;
         int index = PlayerGrid.Instance.MainIndex;
 
         GridCell cell;
@@ -239,12 +278,16 @@ public class LaunchController : MonoBehaviour
             
             if (cell && cell.Part)
             {
-                offsetZ = PlayerGrid.Instance.GetRequireLocalPosition(index - i).z;
-                
-                offsetZ -=
-                    (cell.Part.Type.Category == PartCategory.Boost) ? 1f : 0f;
-                // offsetZ +=
-                //     (cell.Part.Type.Category == PartCategory.Wings) ? 2f : 0f;
+                if (cell.Part.Type.Category == PartCategory.Boost 
+                    || cell.Part.Type.Category == PartCategory.Wheels
+                    || cell.Part.Type.Category == PartCategory.Wings)
+                {
+                    offsetZ += 0.5f;
+                }
+                else
+                {
+                    offsetZ = PlayerGrid.Instance.GetRequireLocalPosition(index - i).z - 0.75f;
+                }
                 
                 pos.z = offsetZ;
             }
@@ -259,16 +302,18 @@ public class LaunchController : MonoBehaviour
         return new Vector3(Mathf.Sin(angleInDegrees * Mathf.Deg2Rad), 0, Mathf.Cos(angleInDegrees * Mathf.Deg2Rad));
     }
 
-    private void OnDrawGizmos()
-    {
-        if (toLaunch)
-        {
-            Gizmos.color = Color.blue;
-
-            Vector3 dir = DirectionFromAngle(180f, angle / 2);
-            Gizmos.DrawLine(toLaunch.transform.position, toLaunch.transform.position + (dir * 15f));
-            dir = DirectionFromAngle(180f, -angle / 2);
-            Gizmos.DrawLine(toLaunch.transform.position, toLaunch.transform.position + (dir * 15f));
-        }
-    }
+    // private void OnDrawGizmos()
+    // {
+    //     if (debugToLaunch)
+    //     {
+    //         Gizmos.color = Color.blue;
+    //
+    //         Vector3 pos = debugToLaunch.position;
+    //         Vector3 dir = DirectionFromAngle(0, maxAngle / 2);
+    //         
+    //         Gizmos.DrawLine(pos, pos + (dir * 15f));
+    //         dir = DirectionFromAngle(0, -maxAngle / 2);
+    //         Gizmos.DrawLine(pos, pos + (dir * 15f));
+    //     }
+    // }
 }

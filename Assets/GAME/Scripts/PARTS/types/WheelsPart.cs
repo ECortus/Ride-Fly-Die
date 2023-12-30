@@ -37,15 +37,19 @@ public class WheelsPart : Part
             wheel2.Rotate(rotate, Space.Self);
         }
     }
-    
-    private Vector3 direction => transform.forward;
+
+    private Vector3 direction => -transform.forward;
     
     public override ParametersModifier GetFlyParameters()
     {
+        int mod = Vector3.Angle(-transform.up, Vector3.down) >= 90f ? 0 : 1;
+        
         ParametersModifier modif = new ParametersModifier(
             ModifierType.Wheels,
-            pars.GetAccelerationModifier(Level),
-            direction
+            pars.GetAccelerationModifier(Level) * mod,
+            direction * mod,
+            transform.localPosition,
+            Mass
         );
 
         return modif;

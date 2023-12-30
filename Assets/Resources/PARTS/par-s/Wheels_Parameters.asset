@@ -9,11 +9,8 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b4656e471d3233f43a901ae9a393b43b, type: 3}
-  m_Name: CurrencyAmountObject
+  m_Script: {fileID: 11500000, guid: ae2bdd68dbc7cb2499738aab3ab973a9, type: 3}
+  m_Name: Wheels_Parameters
   m_EditorClassIdentifier: 
-  <MaxLevel>k__BackingField: 999
-  goldMultiple: 1.075
-  gemMultiple: 1.035
-  defaultCost: 18
-  multipleCostPerLevel: 1.9
+  defaultAccelerationModifier: 0.13
+  multiple: 0.2

@@ -114,7 +114,7 @@ public class Tutorial : MonoBehaviour
     [SerializeField] private GameObject rotateObj;
     [SerializeField] private Transform rotatePos1, rotatePos2;
 
-    int GetIndexOfPartOnMerge(PartType type, int lvl = -1, int indexIgnored = -1)
+    int GetIndexOfPartOnMerge(PartCategory type, int lvl = -1, int indexIgnored = -1)
     {
         int pos = -1;
         MergeCell cell;
@@ -122,7 +122,7 @@ public class Tutorial : MonoBehaviour
         for (int i = 0; i < MergeGrid.Instance._cells.Length; i++)
         {
             cell = MergeGrid.Instance._cells[i];
-            if (cell && cell.Part && cell.Part.Type == type
+            if (cell && cell.Part && cell.Part.Type.Category == type
                 && (lvl == -1 || cell.Part.Level == lvl)
                 && (indexIgnored == -1 || i != indexIgnored))
             {
@@ -150,8 +150,8 @@ public class Tutorial : MonoBehaviour
         Instance = this;
     }
 
-    private bool MergeFieldHaveType(PartType type, int count, int lvl = 0) => MergeGrid.Instance.HavePartOfType(type, lvl) >= count;
-    private bool PlayerGridHaveType(PartType type, int count, int lvl = 0) => PlayerGrid.Instance.HavePartOfType(type, lvl) >= count;
+    private bool MergeFieldHaveType(PartCategory type, int count, int lvl = 0) => MergeGrid.Instance.HavePartOfType(type, lvl) >= count;
+    private bool PlayerGridHaveType(PartCategory type, int count, int lvl = 0) => PlayerGrid.Instance.HavePartOfType(type, lvl) >= count;
     
     private async void FirstIteration()
     {
@@ -176,9 +176,9 @@ public class Tutorial : MonoBehaviour
         await UniTask.Delay(100);
         await UniTask.WaitUntil(() => !brain.IsBlending);
 
-        if (!PlayerGridHaveType(fans, 1))
+        if (!PlayerGridHaveType(PartCategory.Boost, 1))
         {
-            if (!MergeFieldHaveType(fans, 1))
+            if (!MergeFieldHaveType(PartCategory.Boost, 1))
             {
                 BuyPart.SetPartToBuy(fans);
                 buyButton.interactable = true;
@@ -187,12 +187,12 @@ public class Tutorial : MonoBehaviour
                 SetLayer(1);
                 
                 Gold.Plus(Mathf.Clamp(BuyPart.Cost - Gold.Value, 0, 999));
-                await UniTask.WaitUntil(() => MergeFieldHaveType(fans, 1));
+                await UniTask.WaitUntil(() => MergeFieldHaveType(PartCategory.Boost, 1));
             }
 
             buyButton.interactable = false;
 
-            index = GetIndexOfPartOnMerge(fans);
+            index = GetIndexOfPartOnMerge(PartCategory.Boost);
             target = cellsPoses[index];
             
             HandMove(target.position, detailPosFan.position);
@@ -200,7 +200,7 @@ public class Tutorial : MonoBehaviour
             
             Part.SetBlock(false);
 
-            await UniTask.WaitUntil(() => PlayerGridHaveType(fans, 1));
+            await UniTask.WaitUntil(() => PlayerGridHaveType(PartCategory.Boost, 1));
         }
         
         BuyPart.NullPartToBuy();
@@ -273,11 +273,11 @@ public class Tutorial : MonoBehaviour
         await UniTask.Delay(100);
         await UniTask.WaitUntil(() => !brain.IsBlending);
 
-        if (!PlayerGridHaveType(wheels, 1, 1))
+        if (!PlayerGridHaveType(PartCategory.Wheels, 1, 1))
         {
             MergeGrid.Instance.SpawnPart(wheels.GetPart(0));
             
-            if (!MergeFieldHaveType(wheels, 2))
+            if (!MergeFieldHaveType(PartCategory.Wheels, 2))
             {
                 BuyPart.SetPartToBuy(wheels);
                 buyButton.interactable = true;
@@ -286,52 +286,53 @@ public class Tutorial : MonoBehaviour
                 SetLayer(1);
                 
                 Gold.Plus(Mathf.Clamp(BuyPart.Cost - Gold.Value, 0, 999));
-                await UniTask.WaitUntil(() => MergeFieldHaveType(wheels, 2));
+                await UniTask.WaitUntil(() => MergeFieldHaveType(PartCategory.Wheels, 2));
             }
             
             Part.SetBlock(false);
 
-            if (!MergeFieldHaveType(wheels, 1, 1))
+            if (!MergeFieldHaveType(PartCategory.Wheels, 1, 1))
             {
                 buyButton.interactable = false;
 
                 Transform trg1, trg2;
                 
-                index = GetIndexOfPartOnMerge(wheels, 0);
+                index = GetIndexOfPartOnMerge(PartCategory.Wheels, 0);
                 trg1 = cellsPoses[index];
                 SetCellLayer(index);
 
-                index = GetIndexOfPartOnMerge(wheels, 0, index);
+                index = GetIndexOfPartOnMerge(PartCategory.Wheels, 0, index);
                 trg2 = cellsPoses[index];
                 SetCellLayer(index);
                 
                 HandMove(trg1.position, trg2.position);
-                await UniTask.WaitUntil(() => MergeFieldHaveType(wheels, 1, 1));
+                await UniTask.WaitUntil(() => MergeFieldHaveType(PartCategory.Wheels, 1, 1));
             }
 
-            index = GetIndexOfPartOnMerge(wheels, 1);
+            index = GetIndexOfPartOnMerge(PartCategory.Wheels, 1);
             target = cellsPoses[index];
             
             HandMove(target.position, detailPosWheel.position);
             SetCellLayer(index);
 
-            await UniTask.WaitUntil(() => PlayerGridHaveType(wheels, 1, 1));
+            await UniTask.WaitUntil(() => PlayerGridHaveType(PartCategory.Wheels, 1, 1));
         }
         
         BuyPart.NullPartToBuy();
 
-        HandScale(playPos.position);
-        SetLayer(5);
-
-        play2Button.interactable = true;
-        
-        Part.SetBlock(true);
-
-        await UniTask.WaitUntil(() => GameManager.GameStarted);
+        // HandScale(playPos.position);
+        // SetLayer(5);
+        //
+        // play2Button.interactable = true;
+        //
+        // Part.SetBlock(true);
+        //
+        // await UniTask.WaitUntil(() => GameManager.GameStarted);
         
         Part.SetBlock(false);
 
         HandOff();
+        SetCellLayer(-1);
         SetLayer(-1);
 
         SetAllButtons(true);
@@ -360,9 +361,9 @@ public class Tutorial : MonoBehaviour
         await UniTask.Delay(100);
         await UniTask.WaitUntil(() => !brain.IsBlending);
 
-        if (!PlayerGridHaveType(wings, 1))
+        if (!PlayerGridHaveType(PartCategory.Wings, 1))
         {
-            if (!MergeFieldHaveType(wings, 1))
+            if (!MergeFieldHaveType(PartCategory.Wings, 1))
             {
                 BuyPart.SetPartToBuy(wings);
                 buyButton.interactable = true;
@@ -371,12 +372,12 @@ public class Tutorial : MonoBehaviour
                 SetLayer(1);
                 
                 Gold.Plus(Mathf.Clamp(BuyPart.Cost - Gold.Value, 0, 999));
-                await UniTask.WaitUntil(() => MergeFieldHaveType(wings, 1));
+                await UniTask.WaitUntil(() => MergeFieldHaveType(PartCategory.Wings, 1));
             }
 
             buyButton.interactable = false;
 
-            index = GetIndexOfPartOnMerge(wings);
+            index = GetIndexOfPartOnMerge(PartCategory.Wings);
             target = cellsPoses[index];
             
             HandMove(target.position, detailPosWings.position);
@@ -384,23 +385,24 @@ public class Tutorial : MonoBehaviour
             
             Part.SetBlock(false);
 
-            await UniTask.WaitUntil(() => PlayerGridHaveType(wings, 1));
+            await UniTask.WaitUntil(() => PlayerGridHaveType(PartCategory.Wings, 1));
         }
         
         BuyPart.NullPartToBuy();
 
-        HandScale(playPos.position);
-        SetLayer(5);
-
-        play2Button.interactable = true;
-        
-        Part.SetBlock(true);
-
-        await UniTask.WaitUntil(() => GameManager.GameStarted);
+        // HandScale(playPos.position);
+        // SetLayer(5);
+        //
+        // play2Button.interactable = true;
+        //
+        // Part.SetBlock(true);
+        //
+        // await UniTask.WaitUntil(() => GameManager.GameStarted);
         
         Part.SetBlock(false);
 
         HandOff();
+        SetCellLayer(-1);
         SetLayer(-1);
 
         SetAllButtons(true);
@@ -429,6 +431,7 @@ public class Tutorial : MonoBehaviour
         await UniTask.Delay(100);
         await UniTask.WaitUntil(() => !brain.IsBlending);
 
+        layersBG.SetActive(true);
         index = PlayerGrid.Instance.MainIndex;
         int index1 = index + 1;
         int index2 = index - 1;
@@ -446,7 +449,9 @@ public class Tutorial : MonoBehaviour
         
         await UniTask.WaitUntil(() => Input.GetMouseButtonUp(0));
 
+        layersBG.SetActive(false);
         HandOff();
+        SetCellLayer(-1);
         SetLayer(-1);
 
         SetAllButtons(true);
@@ -488,6 +493,8 @@ public class Tutorial : MonoBehaviour
         play2Button.interactable = state;
         backButton.interactable = state;
         buyButton.interactable = state;
+        restartButton.interactable = state;
+        settingsButton.interactable = state;
     }
 
     void HandMove(Vector3 first, Vector3 second)

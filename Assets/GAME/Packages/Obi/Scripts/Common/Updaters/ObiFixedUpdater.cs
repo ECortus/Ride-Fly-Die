@@ -34,7 +34,7 @@ namespace Obi
 
         private void OnDisable()
         {
-            Physics.autoSimulation = true;
+            // Physics.autoSimulation = true;
         }
 
         private void FixedUpdate()

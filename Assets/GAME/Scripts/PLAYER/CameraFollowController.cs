@@ -3,9 +3,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Cinemachine;
+using DG.Tweening;
 using Zenject;
 
-[ExecuteInEditMode]
+// [ExecuteInEditMode]
 public class CameraFollowController : MonoBehaviour
 {
     // [SerializeField] private Vector3 offsetInGame;
@@ -36,7 +37,7 @@ public class CameraFollowController : MonoBehaviour
     public static CameraFollowController Instance { get; private set; }
     
     [SerializeField] private Transform defaultTarget;
-    [SerializeField] private Camera cam;
+    [SerializeField] private CinemachineVirtualCamera virtualCam;
     [Space]
     [SerializeField] private float distanceToTarget = 9f;
     [SerializeField] private float upSpace = 2f;
@@ -44,8 +45,11 @@ public class CameraFollowController : MonoBehaviour
     [SerializeField] private float speedMove = 5f;
     
     private Transform target;
-    
-    public void SetTarget(Transform trg) => target = trg;
+
+    public void SetTarget(Transform trg)
+    {
+        target = trg;
+    }
     public void ResetTarget() => SetTarget(defaultTarget);
     public void ResetPosition() => transform.position = position;
     
@@ -75,6 +79,8 @@ public class CameraFollowController : MonoBehaviour
     // {
     //     Reset();
     // }
+
+    private Vector3 _currentVelocity;
     
     void Update()
     {
@@ -85,6 +91,8 @@ public class CameraFollowController : MonoBehaviour
             // cam.fieldOfView = 60;
             
             transform.position = Vector3.SlerpUnclamped(transform.position, position, speedMove * Time.deltaTime);
+            // transform.position = Vector3.SmoothDamp(transform.position, 
+            //     position, ref _currentVelocity, 1f / speedMove);
         }
     }
 }

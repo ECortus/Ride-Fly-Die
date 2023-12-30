@@ -7,91 +7,95 @@ using UnityEngine;
 public class RopeColBack : MonoBehaviour
 {
     private PlayerController player => PlayerController.Instance;
+    
     [SerializeField] private Transform toMove;
     [SerializeField] private Vector3 offset;
-
-    [Space]
-    [SerializeField] private bool ByCol = false;
-    [SerializeField] private GameObject col;
-    
-    [Space] 
-    [SerializeField] private bool ByDot = false;
-    [SerializeField] private float dotSpace = 1.25f;
-    [SerializeField] private GameObject rightDot;
-    [SerializeField] private GameObject leftDot;
     
     [Space]
     [SerializeField] private ParticleSystem particle;
     [SerializeField] private float particleHeight = -2f;
 
+    [Space] 
+    [SerializeField] private ObiRope rope;
+
+    private float defaultY;
+
+    private bool isOn;
+
+    private Vector3 Position
+    {
+        get
+        {
+            Vector3 pos = player.transform.TransformPoint(LaunchController.CorrectPos() + offset);
+            pos.y = defaultY;
+            return pos;
+        }
+    }
+
+    private Quaternion Rotation
+    {
+        get
+        {
+            Quaternion rot = PlayerController.Instance.Body.rotation;
+            Vector3 angles = rot.eulerAngles;
+            angles.x = angles.z = 0;
+            angles.y = (angles.y + 180f) % 360f;
+            return Quaternion.Euler(angles);
+        }
+    }
+    
     private void Awake()
     {
-        GameManager.OnGameStart += On;
+        defaultY = transform.position.y;
+        
+        // GameManager.OnGameStart += On;
+        // GameManager.OnGameFinish += Off;
+        
         Off();
     }
 
-    void On()
+    public void On()
     {
-        ChangeObjects(1);
+        ResetPos();
         
         toMove.gameObject.SetActive(true);
         particle.gameObject.SetActive(true);
+        
+        isOn = true;
     }
     
-    void Off()
+    public void Off()
     {
-        toMove.gameObject.SetActive(false);
-        particle.gameObject.SetActive(false);
+        isOn = false;
         
-        ChangeObjects(-1);
-        toMove.localPosition = Vector3.zero;
+        toMove.gameObject.SetActive(false);
+        ResetPos();
+        
+        particle.gameObject.SetActive(false);
     }
 
-    void ChangeObjects(int index)
+    void ResetPos()
     {
-        rightDot.SetActive(index > 0 && !ByCol && ByDot);
-        leftDot.SetActive(index > 0 && !ByCol && ByDot);
-            
-        col.SetActive(index > 0 && ByCol && !ByDot);
+        toMove.localEulerAngles = new Vector3(0, 0, 0);
+        toMove.localPosition = Vector3.zero;
     }
     
-    void FixedUpdate()
+    void LateUpdate()
     {
-        if (PlayerController.Launched)
+        if (!GameManager.GameStarted) return;
+        
+        if(isOn)
         {
-            Off();
-        }
-        else
-        {
-            toMove.rotation = LaunchController.Rotate;
-            
-            if (ByDot)
-            {
-                rightDot.transform.localPosition = new Vector3(-dotSpace, 0, 0);
-                leftDot.transform.localPosition = new Vector3(dotSpace, 0, 0);
-            }
-            
-            if (Input.GetMouseButton(0))
-            {
-                if (ByCol)
-                {
-                    col.SetActive(true);
-                }
-                
-                toMove.position = player.transform.position - LaunchController.CorrectPos() + offset;
-            }
-            else
-            {
-                if (ByCol)
-                {
-                    col.SetActive(false);
-                }
-            }
+            toMove.rotation = Rotation;
+            toMove.position = Position;
             
             particle.transform.position = new Vector3(
                 player.transform.position.x,
                 particleHeight,
                 player.transform.position.z);
+            particle.transform.rotation = Quaternion.Euler(0,
+                PlayerController.Instance.Body.rotation.eulerAngles.y + 180f,
+                90f);
         }
     }
 }

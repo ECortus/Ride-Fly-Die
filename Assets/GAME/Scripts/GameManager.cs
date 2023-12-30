@@ -19,6 +19,9 @@ public class GameManager : MonoBehaviour
     public static Action OnGameFinish { get; set; }
     static void GameFinish() => OnGameFinish?.Invoke();
 
+    public static float FlyHeight => PlayerController.Instance.GetDistanceToGround() / FlyDistanceRelativity;
+    public static float FlySpeed => PlayerController.Instance.Body.velocity.magnitude / FlyDistanceRelativity;
+    
     public static float FlyLength
     {
         get
@@ -29,18 +32,26 @@ public class GameManager : MonoBehaviour
             from.y = 0;
             to.y = 0;
 
-            return (from - to).magnitude;
+            return (from - to).magnitude / FlyDistanceRelativity;
         }
     }
-    
-    public static float FlyHeight => PlayerController.Instance.GetDistanceToGround();
 
+    [SerializeField] private float flyDistanceRelativity = 1;
+    private static float FlyDistanceRelativity { get; set; }
+    
+    [Space]
     [SerializeField] private PlayerController player;
     public static Vector3 LaunchPos { get; private set; }
 
+    [Space] 
+    [SerializeField] private float debugTimeScale = 1;
+
     private void Awake()
     {
+        Time.timeScale = debugTimeScale;
+        
         Instance = this;
+        FlyDistanceRelativity = flyDistanceRelativity;
         
         LaunchPos = player.transform.position;
         

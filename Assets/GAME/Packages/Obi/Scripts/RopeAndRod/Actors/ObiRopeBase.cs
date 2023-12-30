@@ -64,6 +64,8 @@ namespace Obi
             int elementCount = elements.Count;
             for (int i = 0; i < elementCount; ++i)
             {
+                if (solver.restPositions == null) continue;
+                
                 solver.restPositions[elements[i].particle1] = new Vector4(pos, 0, 0, 1);
                 pos += elements[i].restLength;
                 solver.restPositions[elements[i].particle2] = new Vector4(pos, 0, 0, 1);

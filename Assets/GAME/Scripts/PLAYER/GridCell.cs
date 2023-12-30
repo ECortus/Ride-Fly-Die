@@ -8,7 +8,7 @@ public class GridCell : MonoBehaviour
     public static event Action OnUpdateState;
         
     public static GridCell SelectedCell { get; private set; }
-    public Part Part { get; private set; }
+    public Part Part;
     public Part AdditionalPart { get; private set; }
 
     private int _id;
@@ -48,13 +48,14 @@ public class GridCell : MonoBehaviour
     public void UnRegistry()
     {
         Part = null;
-
+        
         if (AdditionalPart)
         {
-            MergeGrid.Instance.SpawnPart(Part.Type.GetPart(Part.Level));
+            MergeGrid.Instance.SpawnPart(AdditionalPart.Type.GetPart(AdditionalPart.Level));
             AdditionalPart._currentGridCell.UnRegistryAdditional();
             AdditionalPart.DestroyPart();
         }
+        
         AdditionalPart = null;
         
         OnUpdateState?.Invoke();

@@ -8,6 +8,7 @@ using UnityEngine.UI;
 public class PartUnlockController : MonoBehaviour
 {
     [SerializeField] private float minFlyToTutorialUnlock = 50f;
+    [SerializeField] private int minLevel = 1;
     
     [Space] 
     [SerializeField] private GridsUploads grids;
@@ -51,9 +52,6 @@ public class PartUnlockController : MonoBehaviour
 
     void SetGrids()
     {
-        detailsView.SetActive(false);
-        gridsView.SetActive(true);
-
         foreach (Transform VARIABLE in icons.transform)
         {
             Destroy(VARIABLE.gameObject);
@@ -63,11 +61,14 @@ public class PartUnlockController : MonoBehaviour
         int count = Stats.Length;
 
         if (count == 0) return;
+        
+        detailsView.SetActive(false);
+        gridsView.SetActive(true);
 
         GameObject icon;
         GridsUploads.UploadStat stat;
         
-        for (int i = 0; i < count; i++)
+        for (int i = minLevel; i < count; i++)
         {
             icon = Instantiate(iconPrefab, icons.transform);
             stat = Stats[i];
@@ -76,7 +77,7 @@ public class PartUnlockController : MonoBehaviour
         }
 
         RectTransform flySliderTransform = flySlider.GetComponent<RectTransform>();
-        flySliderTransform.sizeDelta = new Vector2(icons.cellSize.x * (count - 1) + (icons.spacing.x + 5) * (count - 2), flySliderTransform.sizeDelta.y);
+        flySliderTransform.sizeDelta = new Vector2(icons.cellSize.x * (count - 1 - minLevel) + (icons.spacing.x + 5) * (count - 2 - minLevel), flySliderTransform.sizeDelta.y);
 
         flySlider.minValue = 0;
         flySlider.maxValue = 1;
@@ -87,7 +88,7 @@ public class PartUnlockController : MonoBehaviour
         float requireDistance = 0;
         float distance = Records.MaxDistance;
 
-        for(int i = 0; i < count; i++)
+        for(int i = minLevel; i < count; i++)
         {
             requireDistance = Stats[i].RequireDistance;
             

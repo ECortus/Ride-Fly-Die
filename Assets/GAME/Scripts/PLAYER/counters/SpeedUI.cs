@@ -5,11 +5,10 @@ using UnityEngine;
 
 public class SpeedUI : MonoBehaviour
 {
-    private Rigidbody rb => PlayerController.Instance.Body;
     [SerializeField] private TextMeshProUGUI text;
     
     void FixedUpdate()
     {
-        text.text = $"{Mathf.RoundToInt(rb.velocity.magnitude)} km/h";
+        text.text = $"{Mathf.RoundToInt(GameManager.FlySpeed).ToString()} km/h";
     }
 }

@@ -37,14 +37,16 @@ public class BoostPart : Part
         }
     }
     
-    private Vector3 direction => -Vector3.forward * Mathf.Sign(Vector3.Dot(transform.forward, Vector3.forward));
+    private Vector3 direction => new Vector3(transform.forward.x, transform.forward.y, -transform.forward.z);
     
     public override ParametersModifier GetFlyParameters()
     {
         ParametersModifier modif = new ParametersModifier(
             ModifierType.Boost,
             pars.GetMotorForce(Level),
-            direction
+            direction,
+            transform.localPosition,
+            Mass
         );
 
         return modif;

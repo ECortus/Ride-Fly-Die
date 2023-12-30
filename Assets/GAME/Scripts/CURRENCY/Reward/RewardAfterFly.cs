@@ -72,8 +72,8 @@ public class RewardAfterFly : MonoBehaviour
 
     public void On()
     {
-        defaultObject.SetActive(!Tutorial.Completed);
-        rewardObject.SetActive(Tutorial.Completed);
+        defaultObject.SetActive(!Tutorial.Completed || GameManager.FlyLength <= 15f);
+        rewardObject.SetActive(Tutorial.Completed && GameManager.FlyLength > 15f);
 
         IsOn = Tutorial.Completed;
         Angle = 0;

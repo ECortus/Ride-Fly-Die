@@ -74,7 +74,7 @@ public class PlayerGrid : MonoBehaviour
         }
     }
 
-    public int HavePartOfType(PartType type, int lvl = -1)
+    public int HavePartOfType(PartCategory type, int lvl = -1)
     {
         GridCell cell;
         Part part;
@@ -88,17 +88,15 @@ public class PlayerGrid : MonoBehaviour
             if (cell)
             {
                 part = cell.Part;
-                if (part && part.Type == type && (lvl == -1 || part.Level == lvl))
+                if (part && part.Type.Category == type && (lvl == -1 || part.Level == lvl))
                 {
                     count++;
                 }
-                else
+                
+                part = cell.AdditionalPart;
+                if (part && part.Type.Category == type && (lvl == -1 || part.Level == lvl))
                 {
-                    part = cell.AdditionalPart;
-                    if (part && part.Type == type && (lvl == -1 || part.Level == lvl))
-                    {
-                        count++;
-                    }
+                    count++;
                 }
             }
         }
@@ -147,10 +145,13 @@ public class PlayerGrid : MonoBehaviour
     void LoadAll()
     {
         // PlayerController.Instance.ResetBody();
-        
+
+        Part part;
         foreach (Transform VARIABLE in parentForParts)
         {
-            VARIABLE.GetComponent<Part>().DestroyPart();
+            part = VARIABLE.GetComponent<Part>();
+            if (part) part.DestroyPart();
+            else Destroy(VARIABLE.gameObject);
         }
         
         for (int i = 0; i < _cells.Length; i++)
@@ -182,14 +183,14 @@ public class PlayerGrid : MonoBehaviour
         {
             if (stat.Parts[i].Type.Category == PartCategory.Cabin)
             {
-                if (HavePartOfType(stat.Parts[i].Type) > 0)
+                if (HavePartOfType(stat.Parts[i].Type.Category, stat.LevelsOf) > 0)
                 {
                     continue;
                 }
             }
             else if (stat.Parts[i].Type.Category == PartCategory.Grid)
             {
-                if (HavePartOfType(stat.Parts[i].Type) >= stat.Parts.Length - 1 || !PartUnlocked.Grids)
+                if (HavePartOfType(stat.Parts[i].Type.Category, stat.LevelsOf) >= stat.Parts.Length - 1 || !PartUnlocked.Grids)
                 {
                     break;
                 }
@@ -290,7 +291,7 @@ public class PlayerGrid : MonoBehaviour
             // Debug.Log(part.Type.Category + ", " + _cells.IndexOf(cell) + " - " + VARIABLE);
             if (VARIABLE && VARIABLE.Part && (VARIABLE != part.GetGridCell() || VARIABLE.AdditionalPart == part) 
                 && VARIABLE.Part != part && (typeExceptation == null || !typeExceptation.Contains(VARIABLE.Part.Type.Category)
-                && VARIABLE.Part.Type.Category != PartCategory.Grid && VARIABLE.Part.Type.Category != PartCategory.Cabin))
+                && VARIABLE.Part.Type.Category != PartCategory.Cabin && VARIABLE.Part.Type.Category != PartCategory.Grid))
             {
                 value = true;
                 break;

@@ -59,13 +59,13 @@ public class MergeGrid : MonoBehaviour
         }
     }
     
-    public int HavePartOfType(PartType type, int lvl = -1)
+    public int HavePartOfType(PartCategory type, int lvl = -1)
     {
         int count = 0;
         
         foreach (var VARIABLE in _cells)
         {
-            if (VARIABLE && VARIABLE.Part && VARIABLE.Part.Type == type
+            if (VARIABLE && VARIABLE.Part && VARIABLE.Part.Type.Category == type
                 && (lvl == -1 || VARIABLE.Part.Level == lvl))
             {
                 count++;

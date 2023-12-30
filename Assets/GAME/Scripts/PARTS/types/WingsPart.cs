@@ -31,7 +31,9 @@ public class WingsPart : Part
         ParametersModifier modif = new ParametersModifier(
             ModifierType.Wings,
             pars.GetFlyModifier(Level),
-            direction
+            direction,
+            transform.localPosition,
+            Mass
         );
 
         return modif;
