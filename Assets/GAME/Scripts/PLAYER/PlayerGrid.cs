@@ -145,7 +145,6 @@ public class PlayerGrid : MonoBehaviour
     void LoadAll()
     {
         // PlayerController.Instance.ResetBody();
-
         Part part;
         foreach (Transform VARIABLE in parentForParts)
         {
@@ -153,6 +152,8 @@ public class PlayerGrid : MonoBehaviour
             if (part) part.DestroyPart();
             else Destroy(VARIABLE.gameObject);
         }
+        
+        ConnectedParts.Clear();
         
         for (int i = 0; i < _cells.Length; i++)
         {

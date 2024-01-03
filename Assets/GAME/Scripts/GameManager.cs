@@ -32,7 +32,10 @@ public class GameManager : MonoBehaviour
             from.y = 0;
             to.y = 0;
 
-            return (from - to).magnitude / FlyDistanceRelativity;
+            float distance = (from - to).magnitude;
+
+            if (distance > 999999f) return 0f;
+            return distance / FlyDistanceRelativity;
         }
     }
 
@@ -48,6 +51,9 @@ public class GameManager : MonoBehaviour
 
     private void Awake()
     {
+        Application.targetFrameRate = 60;
+        Screen.sleepTimeout = SleepTimeout.NeverSleep;
+        
         Time.timeScale = debugTimeScale;
         
         Instance = this;

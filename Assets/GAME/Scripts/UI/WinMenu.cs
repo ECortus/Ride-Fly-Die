@@ -67,6 +67,14 @@ public class WinMenu : MonoBehaviour
 
     void HideMenu()
     {
+        menuBg.DOKill();
+        menuTitle.DOKill();
+        partUnlock.transform.DOKill();
+        flyText.transform.DOKill();
+        goldText.transform.DOKill();
+        gemText.transform.DOKill();
+        getRewardUI.transform.DOKill();
+        
         menuBg.color = new Color(menuBg.color.r, menuBg.color.g, menuBg.color.b, 0f);
         menuTitle.localScale = Vector3.zero;
         

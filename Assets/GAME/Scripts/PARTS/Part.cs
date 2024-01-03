@@ -24,7 +24,7 @@ public abstract class Part : MonoBehaviour
     public PartCategory Category => Type.Category;
 
     public Rigidbody Body { get; set; }
-    private FixedJoint Joint;
+    private HingeJoint Joint;
     
     private PartOrientation Orientation = PartOrientation.Default;
     public void SetOrientation(PartOrientation ort)
@@ -157,27 +157,24 @@ public abstract class Part : MonoBehaviour
     void OnGameStart()
     {
         // if(Body) Destroy(Body);
-        Part neighbor;
-
-        if (HaveRequireNeighbors(out neighbor) || Type.Category == PartCategory.Cabin || Type.Category == PartCategory.Grid)
-        {
-            // if (Type.Category != PartCategory.Cabin) Joint.connectedBody = neighbor.Body;
-            // else Joint.connectedBody = PlayerController.Instance.Body;
-            
-            // Joint.connectedBody = PlayerController.Instance.Body;
-            // Body.useGravity = false;
-            
-            // AddMod();
-        }
-        else
-        {
-            Disconnect();
-        }
+        // Part neighbor;
+        //
+        // if (HaveRequireNeighbors(out neighbor) || Type.Category == PartCategory.Cabin || Type.Category == PartCategory.Grid)
+        // {
+        //     // if (Type.Category != PartCategory.Cabin) Joint.connectedBody = neighbor.Body;
+        //     // else Joint.connectedBody = PlayerController.Instance.Body;
+        //     
+        //     // Joint.connectedBody = PlayerController.Instance.Body;
+        //     // Body.useGravity = false;
+        //     
+        //     // AddMod();
+        // }
+        // else
+        // {
+        //     Disconnect();
+        // }
         
         Body.isKinematic = false;
-
-        // Body.interpolation = RigidbodyInterpolation.Extrapolate;
-        // Body.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
         
         SwitchObjects(true);
         SwitchColliders(true);
@@ -188,7 +185,9 @@ public abstract class Part : MonoBehaviour
     {
         Body.isKinematic = true;
         Body.useGravity = false;
-        Body.interpolation = RigidbodyInterpolation.Extrapolate;
+
+        Body.interpolation = RigidbodyInterpolation.Interpolate;
+        Body.collisionDetectionMode = CollisionDetectionMode.Discrete;
         
         Joint.connectedBody = PlayerController.Instance.Body;
         Joint.anchor = Vector3.zero;
@@ -199,13 +198,14 @@ public abstract class Part : MonoBehaviour
     
     void RemoveMod()
     {
-        Body.interpolation = RigidbodyInterpolation.None;
+        ConnectedParts.Remove(this);
         
         Joint.connectedBody = null;
         Joint.anchor = Vector3.zero;
         Joint.connectedAnchor = Vector3.zero;
         
-        ConnectedParts.Remove(this);
+        Body.interpolation = RigidbodyInterpolation.None;
+        Body.collisionDetectionMode = CollisionDetectionMode.Discrete;
     }
     
     [ContextMenu("Write default destrict")]
@@ -269,7 +269,7 @@ public abstract class Part : MonoBehaviour
         RepairPart();
 
         Body = GetComponent<Rigidbody>();
-        Joint = GetComponent<FixedJoint>();
+        Joint = GetComponent<HingeJoint>();
         
         Body.isKinematic = true;
         Body.useGravity = false;
@@ -297,13 +297,13 @@ public abstract class Part : MonoBehaviour
             }
         }
 
-        if (_currentGridCell)
-        {
-            Debug.Log($"----------------{name} {Level}----------------");
-            Debug.Log(Joint.anchor);
-            Debug.Log(Joint.connectedAnchor);
-            Debug.Log(transform.localPosition);
-        }
+        // if (_currentGridCell)
+        // {
+        //     Debug.Log($"----------------{name} {Level}----------------");
+        //     Debug.Log(Joint.anchor);
+        //     Debug.Log(Joint.connectedAnchor);
+        //     Debug.Log(transform.localPosition);
+        // }
     }
 
     public void SetLocalPosition(Vector3 local)
@@ -435,26 +435,26 @@ public abstract class Part : MonoBehaviour
 
     public virtual void CrashPart()
     {
-        Object.SetActive(false);
-        Destrict.gameObject.SetActive(true);
-        Destrict.TurnOn(250);
-        
         Disconnect();
         Body.isKinematic = true;
         
         PlayerController.OnRepair -= RepairPart;
         PlayerController.OnCrash -= CrashPart;
+        
+        Object.SetActive(false);
+        Destrict.gameObject.SetActive(true);
+        Destrict.TurnOn(250);
     }
 
     void Disconnect()
     {
+        transform.SetParent(null);
+        
         RemoveMod();
 
-        Joint.connectedBody = null;
         Body.isKinematic = false;
         Body.useGravity = true;
         
-        transform.SetParent(null);
         GameManager.OnMergeGame += DestroyPart;
     }
 

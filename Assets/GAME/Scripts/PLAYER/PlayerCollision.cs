@@ -10,25 +10,25 @@ public class PlayerCollision : MonoBehaviour
         //|| go.layer == LayerMask.NameToLayer("Ground")
         ;
     
-    private void OnCollisionEnter(Collision other)
-    {
-        GameObject go = other.gameObject;
-    
-        if (condition(go))
-        {
-            // PlayerController.Instance.Crash();
-            GameManager.FinishGame();
-        }
-    }
-    
-    private void OnTriggerEnter(Collider other)
-    {
-        GameObject go = other.gameObject;
-    
-        if (condition(go))
-        {
-            // PlayerController.Instance.Crash();
-            GameManager.FinishGame();
-        }
-    }
+    // private void OnCollisionEnter(Collision other)
+    // {
+    //     GameObject go = other.gameObject;
+    //
+    //     if (condition(go))
+    //     {
+    //         // PlayerController.Instance.Crash();
+    //         GameManager.FinishGame();
+    //     }
+    // }
+    //
+    // private void OnTriggerEnter(Collider other)
+    // {
+    //     GameObject go = other.gameObject;
+    //
+    //     if (condition(go))
+    //     {
+    //         // PlayerController.Instance.Crash();
+    //         GameManager.FinishGame();
+    //     }
+    // }
 }

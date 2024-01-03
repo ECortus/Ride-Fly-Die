@@ -32,15 +32,14 @@ public class PlayerController : MonoBehaviour
 
     public Rigidbody Body => engine.Body;
     public Vector3 Center => engine.Center;
-    public void TakeControl() => engine.SetControl(true);
-    public void OffControl() => engine.SetControl(false);
+    public void TakeControl() => AircraftEngine.SetControl(true);
+    public void OffControl() => AircraftEngine.SetControl(false);
     
     public float GetDistanceToGround() => engine.GetDistanceToGround();
-
+    
     void Awake()
     {
         Instance = this;
-
         Follow = transform.Find("follow");
         
         OnCrash += PlayerCrash;
@@ -60,7 +59,7 @@ public class PlayerController : MonoBehaviour
 
     public async void PlayBarrelRoll(float time)
     {
-        if (GameManager.GameStarted && Launched && !engine.onGround)
+        if (GameManager.GameStarted && Launched && !engine.onGround && !AircraftEngine.BlockRotation)
         {
             AircraftEngine.BlockRotation = true;
             ResetMouse();
@@ -126,17 +125,16 @@ public class PlayerController : MonoBehaviour
     public float mouseRotateInput { get; private set; }
     
     [SerializeField] private float mouseLength = 6f;
+    [SerializeField] private float sphereRadius = 6f;
 
     [Header("DEBUG")]
     public List<Part> Parts;
-    public Vector3[] DefaultPoses;
-    public Quaternion[] DefaultRotations;
+    public ConnectedParts.DefaultTransformValue[] DefaultValues;
 
     void FixedUpdate()
     {
         Parts = ConnectedParts.List;
-        DefaultPoses = ConnectedParts.DefaultPositions;
-        DefaultRotations = ConnectedParts.DefaultRotations;
+        DefaultValues = ConnectedParts.DefaultTransforms;
         
         if (AircraftEngine.BlockRotation) return;
         
@@ -211,9 +209,9 @@ public class PlayerController : MonoBehaviour
         ResetBody();
     }
 
-    void CorrectSphereColliderCenter()
+    public void CorrectSphereColliderCenter()
     {
-        engine.Sphere.radius = 5;
+        engine.Sphere.radius = sphereRadius;
         
         Vector3 center = new Vector3(0f, -0.5f, 0f);
 

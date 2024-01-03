@@ -33,8 +33,8 @@ public class AircraftEngine : MonoBehaviour
     [SerializeField] private LayerMask GroundMask;
     private RaycastHit rayHitGround;
 
-    private bool _TakeControl { get; set; }
-    public void SetControl(bool take) => _TakeControl = take;
+    private static bool _TakeControl { get; set; }
+    public static void SetControl(bool take) => _TakeControl = take;
     
     [Header("Physics")]
     public float colliderRadius = 2f;
@@ -110,8 +110,7 @@ public class AircraftEngine : MonoBehaviour
     private float inverseScaleAdjustment = 1;
 
     private List<Part> PlayerParts => ConnectedParts.List;
-    private Vector3[] defaultPosition => ConnectedParts.DefaultPositions;
-    private Quaternion[] defaultRotation => ConnectedParts.DefaultRotations;
+    private ConnectedParts.DefaultTransformValue[] defaultPartsValue => ConnectedParts.DefaultTransforms;
 
     private Vector3 boostDirection => -ConnectedParts.BoostDirection * ConnectedParts.BoostModificator;
     private Vector3 accelerationDirection => -ConnectedParts.AccelerationDirection * ConnectedParts.AccelerationModificator;
@@ -183,12 +182,17 @@ public class AircraftEngine : MonoBehaviour
         SetRotation(rot);
 
         Body.freezeRotation = true;
-        
-        await transform.DORotate(new Vector3(0, 0, -360f),time * 3f, RotateMode.LocalAxisAdd)
+        Body.angularVelocity = Vector3.zero;
+
+        transform.DORotate(new Vector3(0, 0, -360f), time * 2f, RotateMode.LocalAxisAdd)
+            .SetEase(Ease.Linear);
+        await Body.DORotate(new Vector3(0, 0, -360f), time * 2f, RotateMode.LocalAxisAdd)
             .SetEase(Ease.Linear)
             .AsyncWaitForCompletion();
         
+        Body.angularVelocity = Vector3.zero;
         Body.freezeRotation = false;
+        
         SetRotation(rot);
     }
     
@@ -467,17 +471,21 @@ public class AircraftEngine : MonoBehaviour
         Body.velocity = velocity;
         
         Part part;
+        ConnectedParts.DefaultTransformValue defaultValue;
+        
         for (int i = 0; i < PlayerParts.Count; i++)
         {
             part = PlayerParts[i];
+            
             if (part)
             {
-                part.Body.velocity = velocity;
-                part.SetLocalPosition(defaultPosition[i]);
+                defaultValue = defaultPartsValue.FirstOrDefault(x => x.Part == part);
 
-                // Debug.Log($"----------------{part.name}----------------");
-                // Debug.Log(defaultPosition[i]);
-                // Debug.Log(velocity);
+                if (defaultValue.Part == part)
+                {
+                    part.Body.velocity = velocity;
+                    part.SetLocalPosition(defaultValue.Position);
+                }
             }
         }
     }
@@ -511,12 +519,24 @@ public class AircraftEngine : MonoBehaviour
         }
 
         Part part;
+        ConnectedParts.DefaultTransformValue defaultValue;
+        
         for (int i = 0; i < PlayerParts.Count; i++)
         {
             part = PlayerParts[i];
+            
             if (part)
             {
-                part.SetLocalRotation(defaultRotation[i]);
+                defaultValue = defaultPartsValue.FirstOrDefault(x => x.Part == part);
+
+                if (defaultValue.Part == part)
+                {
+                    part.SetLocalRotation(defaultValue.Rotation);
+
+                    // Debug.Log($"----------------{part.name}----------------");
+                    // Debug.Log(defaultPosition[i]);
+                    // Debug.Log(velocity);
+                }
             }
         }
     }

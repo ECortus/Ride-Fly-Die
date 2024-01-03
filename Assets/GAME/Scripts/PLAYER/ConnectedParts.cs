@@ -140,18 +140,27 @@ public static class ConnectedParts
         OnUpdate?.Invoke();
     }
 
-    public static Vector3[] DefaultPositions;
-    public static Quaternion[] DefaultRotations;
+    [Serializable]
+    public struct DefaultTransformValue
+    {
+        public Part Part;
+        public Vector3 Position;
+        public Quaternion Rotation;
+    }
+
+    public static DefaultTransformValue[] DefaultTransforms;
 
     public static void CalculatePosRot()
     {
-        DefaultPositions = new Vector3[List.Count];
-        DefaultRotations = new Quaternion[List.Count];
+        if (List.Count == 0) return;
+        
+        DefaultTransforms = new DefaultTransformValue[List.Count];
 
         for (int i = 0; i < List.Count; i++)
         {
-            DefaultPositions[i] = List[i].transform.localPosition;
-            DefaultRotations[i] = List[i].transform.localRotation;
+            DefaultTransforms[i].Part = List[i];
+            DefaultTransforms[i].Position = List[i].transform.localPosition;
+            DefaultTransforms[i].Rotation = List[i].transform.localRotation;
             
             // Debug.Log("Part - " + List[i].name + ", def rot - " + DefaultRotations[i].eulerAngles);
         }
@@ -179,7 +188,9 @@ public static class ConnectedParts
         CalculateMass();
         CalculateBalance();
         
-        CalculatePosRot();
+        if (!GameManager.GameStarted) CalculatePosRot();
+        
+        if (GameManager.GameStarted) PlayerController.Instance.CorrectSphereColliderCenter();
         
         OnUpdate?.Invoke();
     }
