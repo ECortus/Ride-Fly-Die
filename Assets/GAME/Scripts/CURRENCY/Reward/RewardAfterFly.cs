@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Security.Cryptography.X509Certificates;
+using DG.Tweening;
 using UnityEngine;
 
 public class RewardAfterFly : MonoBehaviour
@@ -52,6 +53,9 @@ public class RewardAfterFly : MonoBehaviour
     [SerializeField] private GameObject defaultObject;
     [SerializeField] private GameObject rewardObject;
 
+    [Space] 
+    [SerializeField] private Transform noThanks;
+
     private WinMenu _winMenu;
 
     public bool IsOn = false;
@@ -61,6 +65,8 @@ public class RewardAfterFly : MonoBehaviour
     private float Target;
 
     private int Multiplier;
+
+    private float noThanksTime;
     
     private void Awake()
     {
@@ -72,8 +78,20 @@ public class RewardAfterFly : MonoBehaviour
 
     public void On()
     {
+        noThanks.DOKill();
+        noThanks.localScale = Vector3.zero;
+        
         defaultObject.SetActive(!Tutorial.Completed || GameManager.FlyLength <= 15f);
         rewardObject.SetActive(Tutorial.Completed && GameManager.FlyLength > 15f);
+
+        if (rewardObject.activeSelf)
+        {
+            noThanksTime = 3f;
+        }
+        else
+        {
+            noThanksTime = 999999f;
+        }
 
         IsOn = Tutorial.Completed;
         Angle = 0;
@@ -85,6 +103,7 @@ public class RewardAfterFly : MonoBehaviour
 
     public void Off()
     {
+        noThanks.DOKill();
         IsOn = false;
     }
 
@@ -92,6 +111,17 @@ public class RewardAfterFly : MonoBehaviour
     {
         if (IsOn)
         {
+            if (noThanks)
+            {
+                if (noThanksTime <= 0)
+                {
+                    noThanks.DOScale(Vector3.one, 0.35f);
+                    noThanksTime = 999999f;
+                }
+
+                noThanksTime -= Time.deltaTime;
+            }
+            
             if (Mathf.Abs(Angle) > Mathf.Abs(Target) - approx)
             {
                 if (Angle >= 0) Sign = -1;

@@ -11,6 +11,7 @@ public class BoostPart : Part
     [SerializeField] private float rotateSpeed = 50f;
     [SerializeField] private float rotateAcceleration = 50f;
     [SerializeField] private Transform fan;
+    [SerializeField] private ParticleSystem trail;
 
     private float rotateTarget;
     private float rotateMotor;
@@ -21,10 +22,14 @@ public class BoostPart : Part
     {
         if (GameManager.GameStarted && VisualMode)
         {
+            if (!trail.isPlaying) trail.Play();
             rotateTarget = 1;
         }
         else
         {
+            trail.Stop();
+            trail.Clear();
+            
             rotateTarget = 0;
         }
 
@@ -37,7 +42,7 @@ public class BoostPart : Part
         }
     }
     
-    private Vector3 direction => new Vector3(transform.forward.x, transform.forward.y, -transform.forward.z);
+    private Vector3 direction => new Vector3(transform.forward.x, transform.forward.y, transform.forward.z);
     
     public override ParametersModifier GetFlyParameters()
     {

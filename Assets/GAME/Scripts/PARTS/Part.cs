@@ -764,7 +764,7 @@ public abstract class Part : MonoBehaviour
         
         ApplyOrientation();
         
-        AddMod();
+        if (!Input.GetMouseButton(0)) AddMod();
         // OnPartPlaceOnGrid();
     }
 

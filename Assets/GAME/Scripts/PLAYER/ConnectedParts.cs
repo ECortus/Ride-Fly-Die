@@ -99,11 +99,11 @@ public static class ConnectedParts
         if (!List.Contains(part))
         {
             List.Add(part);
-            Debug.Log("Added - " + part);
+            // Debug.Log("Added - " + part);
         }
         else
         {
-            Debug.Log("Updated - " + part);
+            // Debug.Log("Updated - " + part);
         }
         
         ParametersModifier mod = part.GetFlyParameters();
@@ -118,7 +118,7 @@ public static class ConnectedParts
             ParametersModifier mod = part.GetFlyParameters();
             CalculateParameters(mod);
             
-            Debug.Log("Removed - " + part);
+            // Debug.Log("Removed - " + part);
         }
     }
 

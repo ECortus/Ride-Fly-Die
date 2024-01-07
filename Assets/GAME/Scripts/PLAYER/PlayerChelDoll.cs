@@ -7,6 +7,7 @@ using Random = UnityEngine.Random;
 public class PlayerChelDoll : MonoBehaviour
 {
     static readonly int _SomethingTopHash = Animator.StringToHash("SomethingTop");
+    static readonly int _Waving = Animator.StringToHash("Waving");
     
     [SerializeField] private Animator animator;
     [SerializeField] private Transform rayDot;
@@ -19,6 +20,7 @@ public class PlayerChelDoll : MonoBehaviour
     private void Awake()
     {
         SetDefault();
+        _haveWaving = false;
     }
 
     private Ray ray;
@@ -45,11 +47,26 @@ public class PlayerChelDoll : MonoBehaviour
         }
     }
 
+    private bool _haveWaving = false;
+
     void FixedUpdate()
     {
-        if (!GameManager.GameStarted && !Part.DragedPart)
+        if (!GameManager.GameStarted)
         {
-            animator.SetBool(_SomethingTopHash, SomethingOverPlayer);
+            if (!Part.DragedPart)
+            {
+                animator.SetBool(_SomethingTopHash, SomethingOverPlayer);
+            }
+            
+            _haveWaving = false;
+        }
+        else
+        {
+            if (!_haveWaving && GameManager.FlyLength > 15f)
+            {
+                animator.SetTrigger(_Waving);
+                _haveWaving = true;
+            }
         }
     }
 

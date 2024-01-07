@@ -327,7 +327,7 @@ MonoBehaviour:
   <Level>k__BackingField: 3
   <Mass>k__BackingField: 2.4
   <Sprite>k__BackingField: {fileID: 21300000, guid: 3ac91d96b9556e7428e1aa0b4bc6dcd0, type: 3}
-  <PreShowOnPlayer>k__BackingField: 0
+  <PreShowOnPlayer>k__BackingField: 1
   <BlockMerge>k__BackingField: 0
   <BlockMove>k__BackingField: 0
   <Orientations>k__BackingField:

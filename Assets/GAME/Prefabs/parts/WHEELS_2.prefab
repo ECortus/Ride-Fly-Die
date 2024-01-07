@@ -1188,7 +1188,7 @@ MonoBehaviour:
   <Level>k__BackingField: 1
   <Mass>k__BackingField: 1.8
   <Sprite>k__BackingField: {fileID: 21300000, guid: f4ffaa5b858971c4e8d32ca5bae2ebd8, type: 3}
-  <PreShowOnPlayer>k__BackingField: 0
+  <PreShowOnPlayer>k__BackingField: 1
   <BlockMerge>k__BackingField: 0
   <BlockMove>k__BackingField: 0
   <Orientations>k__BackingField:

@@ -13,14 +13,19 @@ public class UpgradeButtonUI : MonoBehaviour
     [Space] 
     [SerializeField] private GameObject enoughObject;
     [SerializeField] private GameObject noObject;
+    [SerializeField] private GameObject adObject;
 
     private int currentCost => upObject.Cost;
 
+    private bool HaveAdRV = false;
+
     void Awake()
     {
+        GameManager.OnMergeGame += RefreshAdRV;
         GameManager.OnMergeGame += Refresh;
         Gem.OnValueChange += Refresh;
         
+        RefreshAdRV();
         Refresh();
     }
 
@@ -33,6 +38,19 @@ public class UpgradeButtonUI : MonoBehaviour
             
             Refresh();
         }
+    }
+
+    public void OnButtonClickRV()
+    {
+        HaveAdRV = false;
+            
+        upObject.Action();
+        Refresh();
+    }
+
+    void RefreshAdRV()
+    {
+        HaveAdRV = Tutorial.Completed;
     }
     
     public void Refresh()
@@ -63,7 +81,9 @@ public class UpgradeButtonUI : MonoBehaviour
 
     void ChangeObject(bool state)
     {
+        noObject.SetActive(!state && !HaveAdRV);
+        adObject.SetActive(!state && HaveAdRV);
+        
         enoughObject.SetActive(state);
-        noObject.SetActive(!state);
     }
 }

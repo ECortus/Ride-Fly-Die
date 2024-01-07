@@ -170,6 +170,8 @@ public class LaunchController : MonoBehaviour
         
         _ropeColBack.On();
         
+        counterPercent.gameObject.SetActive(true);
+        
         isOn = true;
     }
 
@@ -181,6 +183,8 @@ public class LaunchController : MonoBehaviour
         animObject.SetActive(false);
         
         _ropeColBack.Off();
+        
+        counterPercent.gameObject.SetActive(false);
         
         rope.gameObject.SetActive(false);
         pillar1.localScale = Vector3.zero;
@@ -249,7 +253,7 @@ public class LaunchController : MonoBehaviour
 
     void SetText(float percent)
     {
-        counterPercent.gameObject.SetActive(percent >= 0);
+        // counterPercent.gameObject.SetActive(percent >= 0);
         counterPercent.text = $"{Mathf.RoundToInt(percent * 100f)}%";
     }
 
