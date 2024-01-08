@@ -549,7 +549,7 @@ public abstract class Part : MonoBehaviour
                 if (PreShowOnPlayer)
                 {
                     if (selectedGrid.Part && !selectedGrid.Part.Orientations.Block.Front 
-                                          && !selectedGrid.AdditionalPart
+                                          && (!selectedGrid.AdditionalPart || selectedGrid.AdditionalPart == this)
                                           && Orientations.HaveOrientation(PartOrientation.Front))
                     {
                         SetOrientation(PartOrientation.Front);
